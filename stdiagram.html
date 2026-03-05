@@ -422,14 +422,14 @@
   <div class="props-body" id="propsBody">
     <div class="no-select">Selecione um<br>elemento para<br>editar</div>
   </div>
-  <div style="padding:6px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+  <div style="padding:6px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
     <div style="font-size:10px;color:var(--text2);text-align:center;padding:2px 0;">Desenvolvido por:</div>
-    <div style="height:100px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='80'%3E%3Crect width='180' height='80' rx='4' fill='%23242b3d'/%3E%3Ctext x='90' y='44' text-anchor='middle' font-family='sans-serif' font-size='11' fill='%236b7280'%3ELogo 1%3C/text%3E%3C/svg%3E" style="max-width:100%;max-height:100%">
+    <div style="height:50px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 8px;">
+      <img id="logoST" src="logo/logostn.png" style="max-width:100%;max-height:100%;object-fit:contain;">
     </div>
     <div style="font-size:10px;color:var(--text2);text-align:center;padding:2px 0;">Patrocinado por:</div>
-    <div style="height:100px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='80'%3E%3Crect width='180' height='80' rx='4' fill='%23242b3d'/%3E%3Ctext x='90' y='44' text-anchor='middle' font-family='sans-serif' font-size='11' fill='%236b7280'%3ELogo 2%3C/text%3E%3C/svg%3E" style="max-width:100%;max-height:100%">
+    <div style="height:50px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 8px;">
+      <img id="logoHE" src="logo/logohen.png" style="max-width:100%;max-height:100%;object-fit:contain;">
     </div>
   </div>
 </div>
@@ -462,6 +462,8 @@ try{
 }catch(e){}
 document.getElementById('btnTheme').textContent=lightTheme?'🌙 Escuro':'☀ Claro';
 wrap.style.background=lightTheme?'#ffffff':'';
+document.getElementById('logoST').src=lightTheme?'logo/logostp.png':'logo/logostn.png';
+document.getElementById('logoHE').src=lightTheme?'logo/logohep.png':'logo/logohen.png';
 let history = [], future = [];
 let panX = 0, panY = 0, isPanning = false, panStart = {x:0,y:0}, spaceDown = false;
 let lastProps = {}; // stores last used props per type
@@ -1787,6 +1789,8 @@ document.getElementById('btnTheme').addEventListener('click',function(){
   document.body.classList.toggle('light-theme',lightTheme);
   wrap.style.background=lightTheme?'#ffffff':'';
   this.textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+  document.getElementById('logoST').src=lightTheme?'logo/logostp.png':'logo/logostn.png';
+  document.getElementById('logoHE').src=lightTheme?'logo/logohep.png':'logo/logohen.png';
   try{localStorage.setItem('diagrama-theme',lightTheme?'light':'dark');}catch(e){}
   render();
 });
