@@ -8,5 +8,5 @@ Portal em desenvolvimento
 Acesse nossa ferramenta educacional para criação de diagramas de estruturas
 </p> 
 <p align="center">
-  <a href="stdiagram.htm">ST Diagram</a>
+  <a href="stdiagram.html">ST Diagram</a>
 </p>
