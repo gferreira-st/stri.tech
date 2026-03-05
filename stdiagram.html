@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagrama Estrutural - STRi.tech</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#111827;--panel:#1a1f2e;--panel2:#242b3d;--border:#374151;
+    --accent:#2dd4bf;--accent2:#a78bfa;--green:#2dd4bf;--text:#d1d5db;--text2:#6b7280;--bg2:#1a1f2e;
+    --fs-sm:10px;--fs-md:11px;--fs-lg:13px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  header{height:38px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;}
+  header h1{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--accent);letter-spacing:.05em;}
+  .header-sep{flex:1;}
+  .btn{padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:var(--fs-md);font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:all .15s;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+  .btn.accent-inv{border-color:#a78bfa;color:#a78bfa;}
+  .btn.accent-inv:hover{background:#a78bfa22;}
+  .btn.primary-inv{background:#a78bfa;border-color:#a78bfa;color:#fff;font-weight:500;}
+  body.light-theme .btn.accent-inv{border-color:#2dd4bf;color:#2dd4bf;}
+  body.light-theme .btn.accent-inv:hover{background:#2dd4bf22;}
+  body.light-theme .btn.primary-inv{background:#2dd4bf;border-color:#2dd4bf;}
+  .btn.primary:hover{background:#3a8eef;}
+  .btn.danger{border-color:#f87171;color:#f87171;}
+  .btn.danger:hover{background:#f8717122;}
+  .workspace{display:flex;flex:1;overflow:hidden;}
+  .sidebar{width:130px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;scrollbar-width:thin;}
+  .sidebar-section{padding:4px 4px 2px;}
+  .sidebar-label{font-size:var(--fs-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);padding:0 2px;margin-bottom:3px;text-align:center;}
+  .element-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+  .element-btn{background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:3px 1px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0px;transition:all .15s;user-select:none;min-width:0;}
+  .element-btn:hover{border-color:var(--accent);background:#1e2535cc;}
+  .element-btn svg{display:block;max-width:100%;height:auto;}
+  .element-btn[data-tool="select"] svg{color:var(--accent);}
+  .element-btn span{font-size:9px;color:var(--text2);text-align:center;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .element-btn:hover span{color:var(--accent);}
+  .sidebar-sep{height:1px;background:var(--border);margin:2px 4px;}
+  .canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--canvas-bg,#0a0d14);}
+  canvas{position:absolute;top:0;left:0;cursor:crosshair;}
+  .props-panel{width:210px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+  .props-header{padding:10px 12px 6px;border-bottom:1px solid var(--border);font-size:var(--fs-lg);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);}
+  .props-body{padding:10px;flex:1;overflow-y:auto;}
+  .prop-group{margin-bottom:10px;}
+  .prop-label{font-size:var(--fs-sm);color:var(--text2);margin-bottom:4px;}
+  .prop-input{width:100%;background:#111827;border:1px solid var(--border);border-radius:4px;padding:4px 8px;color:var(--text);font-size:var(--fs-md);font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .15s;}
+  .prop-input:focus{border-color:var(--accent);}
+  .prop-row{display:flex;gap:6px;}
+  .prop-row .prop-input{flex:1;}
+  .color-swatch{display:flex;gap:4px;flex-wrap:wrap;}
+  .swatch{width:20px;height:20px;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:transform .1s;}
+  .swatch:hover{transform:scale(1.1);}
+  .swatch.active{border-color:white;}
+  .no-select{color:var(--text2);font-size:var(--fs-md);text-align:center;margin-top:20px;line-height:1.6;}
+  .statusbar{height:22px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:16px;font-size:var(--fs-sm);color:var(--text2);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+  .statusbar span{display:flex;align-items:center;gap:4px;}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+  .tool-active{border-color:var(--accent)!important;background:color-mix(in srgb, var(--accent) 12%, transparent)!important;}
+  .tool-active span{color:var(--accent)!important;}
+  .rot-btns{display:flex;gap:3px;margin-top:4px;}
+  .rot-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;height:24px;background:var(--panel2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:var(--fs-sm);color:var(--text2);transition:all .15s;}
+  .rot-btn:hover{border-color:var(--accent);color:var(--accent);}
+  body.light-theme{--bg:#f3f4f6;--panel:#e5e7eb;--panel2:#d1d5db;--border:#9ca3af;--text:#111827;--text2:#4b5563;--canvas-bg:#ffffff;--accent:#7c3aed;--bg2:#ede9fe;}
+  body.light-theme .prop-input{background:#f9fafb;color:#111827;}
+  body.light-theme .element-btn{background:var(--panel2);border-color:var(--border);}
+  body.light-theme .element-btn:hover{background:#c4c9d4cc;}
+  body.light-theme header,body.light-theme .sidebar,body.light-theme .props-panel,body.light-theme .statusbar{background:var(--panel);border-color:var(--border);}
+</style>
+</head>
+<body>
+<header>
+  <h1>ST DIAGRAM</h1>
+  <div class="header-sep"></div>
+  <button class="btn" id="btnTheme">🌙 Escuro</button>
+  <button class="btn" id="btnGrid">Grid: ON</button>
+  <button class="btn" id="btnSnap">Snap: ON</button>
+  <button class="btn" id="btnUndo">↩ Desfazer</button>
+  <button class="btn" id="btnRedo">↪ Refazer</button>
+  <button class="btn" id="btnDupe" title="Ctrl+D">⧉ Duplicar</button>
+  <button class="btn danger" id="btnClear">Limpar</button>
+  <button class="btn accent-inv" id="btnImport">📂 Abrir XML</button>
+  <button class="btn" id="btnSave">💾 Salvar XML</button>
+  <input type="file" id="fileInput" accept=".xml" style="display:none">
+  <button class="btn primary-inv" id="btnExport">⬇ Exportar PNG</button>
+</header>
+<div class="workspace">
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="element-grid">
+      <div class="element-btn tool-active" data-tool="select" title="Selecionar">
+        <svg width="32" height="32" viewBox="0 0 44 44"><polygon points="10,6 10,34 18,26 24,38 28,36 22,24 34,24" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Selecionar</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Anotação</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="dim" title="Cota">
+        <svg width="48" height="16" viewBox="0 0 52 16">
+          <line x1="6" y1="8" x2="46" y2="8" stroke="#6b7280" stroke-width="1.3"/>
+          <line x1="6" y1="3" x2="6" y2="13" stroke="#6b7280" stroke-width="1.3"/>
+          <line x1="46" y1="3" x2="46" y2="13" stroke="#6b7280" stroke-width="1.3"/>
+          <polygon points="14,8 6,5 6,11" fill="#6b7280"/>
+          <polygon points="38,8 46,5 46,11" fill="#6b7280"/>
+        </svg>
+        <span>Cota</span>
+      </div>
+      <div class="element-btn" data-tool="text" title="Texto">
+        <svg width="28" height="24" viewBox="0 0 28 24"><text x="14" y="19" text-anchor="middle" font-size="18" fill="#6b7280" font-family="IBM Plex Sans" font-weight="600">T</text></svg>
+        <span>Texto</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Barras</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="beam" title="Barra">
+        <svg width="48" height="16" viewBox="0 0 52 16"><line x1="4" y1="8" x2="48" y2="8" stroke="#374151" stroke-width="3"/></svg>
+        <span>Barra</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Sólidos</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="rect_solid" title="Retângulo">
+        <svg width="40" height="22" viewBox="0 0 52 36"><rect x="4" y="6" width="44" height="24" fill="#6b7280" rx="1"/></svg>
+        <span>Retângulo</span>
+      </div>
+      <div class="element-btn" data-tool="tri_solid" title="Triângulo Ret.">
+        <svg width="40" height="24" viewBox="0 0 52 36"><polygon points="4,32 4,4 48,32" fill="#6b7280"/></svg>
+        <span>Triâng. Ret.</span>
+      </div>
+      <div class="element-btn" data-tool="arc_solid" title="Arco Preenchido">
+        <svg width="44" height="24" viewBox="0 0 52 28"><path d="M4,24 A22,22 0 0,1 48,24 Z" fill="#6b7280"/></svg>
+        <span>Arco</span>
+      </div>
+      <div class="element-btn" data-tool="tri_arc_solid" title="Triâng. c/ Arco">
+        <svg width="44" height="24" viewBox="0 0 52 36"><path d="M4,32 L4,4 A48,28 0 0,1 48,32 Z" fill="#6b7280"/></svg>
+        <span>Triâng. Arco</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Apoios</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="pin" title="Apoio Fixo">
+        <svg width="34" height="28" viewBox="0 0 34 28">
+          <polygon points="17,2 3,20 31,20" fill="none" stroke="#f97316" stroke-width="2"/>
+          <line x1="1" y1="20" x2="33" y2="20" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="5" y1="20" x2="2" y2="25" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="10" y1="20" x2="7" y2="25" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="15" y1="20" x2="12" y2="25" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="20" y1="20" x2="17" y2="25" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="25" y1="20" x2="22" y2="25" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="30" y1="20" x2="27" y2="25" stroke="#f97316" stroke-width="1.2"/>
+        </svg>
+        <span>Apoio Fixo</span>
+      </div>
+      <div class="element-btn" data-tool="roller" title="Apoio Móvel">
+        <svg width="34" height="32" viewBox="0 0 34 32">
+          <polygon points="17,2 3,18 31,18" fill="none" stroke="#f97316" stroke-width="2"/>
+          <circle cx="10" cy="23" r="3" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="24" cy="23" r="3" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="1" y1="28" x2="33" y2="28" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="4" y1="28" x2="1" y2="31" stroke="#f97316" stroke-width="1"/>
+          <line x1="9" y1="28" x2="6" y2="31" stroke="#f97316" stroke-width="1"/>
+          <line x1="14" y1="28" x2="11" y2="31" stroke="#f97316" stroke-width="1"/>
+          <line x1="19" y1="28" x2="16" y2="31" stroke="#f97316" stroke-width="1"/>
+          <line x1="24" y1="28" x2="21" y2="31" stroke="#f97316" stroke-width="1"/>
+          <line x1="29" y1="28" x2="26" y2="31" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Apoio Móvel</span>
+      </div>
+      <div class="element-btn" data-tool="fixed" title="Engaste">
+        <svg width="28" height="24" viewBox="0 0 28 24">
+          <line x1="14" y1="1" x2="14" y2="23" stroke="#f97316" stroke-width="2"/>
+          <line x1="14" y1="1" x2="6" y2="7" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="14" y1="5" x2="6" y2="11" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="14" y1="9" x2="6" y2="15" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="14" y1="13" x2="6" y2="19" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="14" y1="17" x2="6" y2="23" stroke="#f97316" stroke-width="1.5"/>
+        </svg>
+        <span>Engaste</span>
+      </div>
+      <div class="element-btn" data-tool="roller_fixed" title="Engaste Móvel">
+        <svg width="28" height="28" viewBox="-1 -3 22 38">
+          <line x1="6" y1="2" x2="6" y2="30" stroke="#f97316" stroke-width="2"/>
+          <line x1="6" y1="2" x2="1.5" y2="-2.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="6" x2="1.5" y2="1.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="10" x2="1.5" y2="5.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="14" x2="1.5" y2="9.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="18" x2="1.5" y2="13.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="22" x2="1.5" y2="17.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="26" x2="1.5" y2="21.5" stroke="#f97316" stroke-width="1.1"/>
+          <line x1="6" y1="30" x2="1.5" y2="25.5" stroke="#f97316" stroke-width="1.1"/>
+          <circle cx="11" cy="9" r="4" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="11" cy="23" r="4" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="16" y1="2" x2="16" y2="30" stroke="#f97316" stroke-width="2.5"/>
+        </svg>
+        <span>Eng. Móvel</span>
+      </div>
+      <div class="element-btn" data-tool="spring" title="Mola Pontual">
+        <svg width="28" height="30" viewBox="0 0 28 30">
+          <polyline points="14,1 14,3 21,5.5 7,9.5 21,13.5 7,17.5 21,21.5 14,24" fill="none" stroke="#f97316" stroke-width="1.6"/>
+          <line x1="5" y1="24" x2="23" y2="24" stroke="#f97316" stroke-width="1.6"/>
+          <line x1="6" y1="24" x2="3" y2="28" stroke="#f97316" stroke-width="1"/>
+          <line x1="10" y1="24" x2="7" y2="28" stroke="#f97316" stroke-width="1"/>
+          <line x1="14" y1="24" x2="11" y2="28" stroke="#f97316" stroke-width="1"/>
+          <line x1="18" y1="24" x2="15" y2="28" stroke="#f97316" stroke-width="1"/>
+          <line x1="22" y1="24" x2="19" y2="28" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Mola Pont.</span>
+      </div>
+      <div class="element-btn" data-tool="spring_roller" title="Mola Móvel">
+        <svg width="28" height="36" viewBox="0 0 28 38">
+          <polyline points="14,1 14,3 21,5.5 7,9.5 21,13.5 7,17.5 21,21.5 14,24" fill="none" stroke="#f97316" stroke-width="1.6"/>
+          <circle cx="8" cy="28.5" r="3" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="20" cy="28.5" r="3" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="1" y1="33.5" x2="27" y2="33.5" stroke="#f97316" stroke-width="1.3"/>
+          <line x1="3" y1="33.5" x2="0" y2="37" stroke="#f97316" stroke-width="1"/>
+          <line x1="8" y1="33.5" x2="5" y2="37" stroke="#f97316" stroke-width="1"/>
+          <line x1="13" y1="33.5" x2="10" y2="37" stroke="#f97316" stroke-width="1"/>
+          <line x1="18" y1="33.5" x2="15" y2="37" stroke="#f97316" stroke-width="1"/>
+          <line x1="23" y1="33.5" x2="20" y2="37" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Mola Móvel</span>
+      </div>
+      <div class="element-btn" data-tool="pin_linear" title="Apoio Fixo Linear">
+        <svg width="48" height="18" viewBox="0 0 48 18">
+          <polygon points="8,1 3,9 13,9" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <polygon points="24,1 19,9 29,9" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <polygon points="40,1 35,9 45,9" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="1" y1="9" x2="47" y2="9" stroke="#f97316" stroke-width="1.3"/>
+          <line x1="3" y1="9" x2="0" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="9" y1="9" x2="6" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="15" y1="9" x2="12" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="21" y1="9" x2="18" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="27" y1="9" x2="24" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="33" y1="9" x2="30" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="39" y1="9" x2="36" y2="13" stroke="#f97316" stroke-width="1"/>
+          <line x1="45" y1="9" x2="42" y2="13" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Fixo Linear</span>
+      </div>
+      <div class="element-btn" data-tool="roller_linear" title="Apoio Móvel Linear">
+        <svg width="48" height="18" viewBox="0 0 48 18">
+          <circle cx="8" cy="5" r="3.5" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="24" cy="5" r="3.5" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <circle cx="40" cy="5" r="3.5" fill="none" stroke="#f97316" stroke-width="1.5"/>
+          <line x1="1" y1="10" x2="47" y2="10" stroke="#f97316" stroke-width="1.3"/>
+          <line x1="3" y1="10" x2="0" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="9" y1="10" x2="6" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="15" y1="10" x2="12" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="21" y1="10" x2="18" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="27" y1="10" x2="24" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="33" y1="10" x2="30" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="39" y1="10" x2="36" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="45" y1="10" x2="42" y2="14" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Móvel Linear</span>
+      </div>
+      <div class="element-btn" data-tool="fixed_linear" title="Engaste Linear">
+        <svg width="48" height="20" viewBox="0 0 48 20">
+          <line x1="2" y1="4" x2="46" y2="4" stroke="#f97316" stroke-width="2"/>
+          <line x1="4" y1="4" x2="0" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="10" y1="4" x2="6" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="16" y1="4" x2="12" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="22" y1="4" x2="18" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="28" y1="4" x2="24" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="34" y1="4" x2="30" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="40" y1="4" x2="36" y2="10" stroke="#f97316" stroke-width="1.2"/>
+          <line x1="46" y1="4" x2="42" y2="10" stroke="#f97316" stroke-width="1.2"/>
+        </svg>
+        <span>Eng. Linear</span>
+      </div>
+      <div class="element-btn" data-tool="spring_linear" title="Mola Linear">
+        <svg width="48" height="18" viewBox="0 0 48 18">
+          <polyline points="6,0 3,1.5 9,3.5 3,5.5 9,7.5 6,9" fill="none" stroke="#f97316" stroke-width="1.3"/>
+          <polyline points="24,0 21,1.5 27,3.5 21,5.5 27,7.5 24,9" fill="none" stroke="#f97316" stroke-width="1.3"/>
+          <polyline points="42,0 39,1.5 45,3.5 39,5.5 45,7.5 42,9" fill="none" stroke="#f97316" stroke-width="1.3"/>
+          <line x1="2" y1="10" x2="46" y2="10" stroke="#f97316" stroke-width="1.3"/>
+          <line x1="4" y1="10" x2="1" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="10" y1="10" x2="7" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="16" y1="10" x2="13" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="22" y1="10" x2="19" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="28" y1="10" x2="25" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="34" y1="10" x2="31" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="40" y1="10" x2="37" y2="14" stroke="#f97316" stroke-width="1"/>
+          <line x1="46" y1="10" x2="43" y2="14" stroke="#f97316" stroke-width="1"/>
+        </svg>
+        <span>Mola Linear</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Conexões</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="hinge" title="Rótula">
+        <svg width="28" height="28" viewBox="0 0 28 28">
+          <line x1="14" y1="2" x2="14" y2="9" stroke="#fbbf24" stroke-width="2.5"/>
+          <line x1="14" y1="19" x2="14" y2="26" stroke="#fbbf24" stroke-width="2.5"/>
+          <circle cx="14" cy="14" r="5" fill="#1a1f2e" stroke="#fbbf24" stroke-width="2"/>
+        </svg>
+        <span>Rótula</span>
+      </div>
+      <div class="element-btn" data-tool="node" title="Nó Rígido">
+        <svg width="28" height="28" viewBox="0 0 28 28">
+          <line x1="14" y1="2" x2="14" y2="9" stroke="#fbbf24" stroke-width="2.5"/>
+          <line x1="14" y1="19" x2="14" y2="26" stroke="#fbbf24" stroke-width="2.5"/>
+          <rect x="8" y="8" width="12" height="12" fill="#fbbf24"/>
+        </svg>
+        <span>Nó Rígido</span>
+      </div>
+      <div class="element-btn" data-tool="hinge_spring" title="Art. c/ Mola">
+        <svg width="28" height="28" viewBox="0 0 30 30">
+          <circle cx="15" cy="15" r="2" fill="#fbbf24"/>
+          <polyline points="15.0,13.0 15.6,12.9 16.2,13.0 16.8,13.2 17.3,13.7 17.7,14.3 18.0,15.0 18.1,15.8 17.9,16.7 17.5,17.5 16.8,18.2 16.0,18.7 15.0,19.0 13.9,19.0 12.8,18.8 11.8,18.2 11.0,17.3 10.3,16.3 10.0,15.0 10.0,13.7 10.4,12.3 11.1,11.1 12.2,10.1 13.5,9.4 15.0,9.0 16.6,9.0 18.2,9.5 19.6,10.4 20.8,11.7 21.6,13.2 22.0,15.0 21.9,16.9 21.4,18.7 20.3,20.3 18.8,21.6 17.0,22.6 15.0,23.0 12.9,22.9 10.8,22.2 9.0,21.0 7.5,19.3 6.5,17.3 6.0,15.0 6.1,12.6 6.9,10.3 8.3,8.3 10.2,6.6 12.5,5.5 15.0,5.0 17.6,5.2 20.2,6.1 22.4,7.6 24.2,9.7 25.5,12.2 26.0,15.0 25.8,17.9 24.8,20.7 23.1,23.1 20.8,25.1 18.1,26.4 15.0,27.0" fill="none" stroke="#fbbf24" stroke-width="1.6"/>
+        </svg>
+        <span>Art. Mola</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Cargas</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="force_down" title="Força Pontual">
+        <svg width="24" height="30" viewBox="0 0 24 30">
+          <line x1="12" y1="2" x2="12" y2="19" stroke="#2dd4bf" stroke-width="2.5"/>
+          <polygon points="12,28 6,18 18,18" fill="#2dd4bf"/>
+        </svg>
+        <span>Força Pont.</span>
+      </div>
+      <div class="element-btn" data-tool="moment_cw" title="Momento">
+        <svg width="28" height="28" viewBox="0 0 30 30">
+          <circle cx="15" cy="15" r="2" fill="#a78bfa"/>
+          <polyline points="17.0,5.2 18.1,5.5 19.1,5.9 20.1,6.4 21.0,7.0 21.8,7.7 22.6,8.5 23.3,9.4 23.8,10.3 24.3,11.3 24.7,12.4 24.9,13.5 25.0,14.6 25.0,15.7 24.8,16.8 24.6,17.9 24.2,18.9 23.7,19.9 23.1,20.8 22.4,21.7 21.7,22.5 20.8,23.2 19.9,23.7 18.9,24.2 17.8,24.6 16.7,24.8 15.6,25.0 14.5,25.0 13.4,24.9 12.4,24.6 11.3,24.3 10.3,23.8 9.4,23.3 8.5,22.6 7.7,21.8 7.0,21.0 6.4,20.0 5.9,19.1 5.5,18.0 5.2,17.0 5.0,15.9 5.0,14.8 5.1,13.6 5.3,12.6 5.6,11.5 6.1,10.5 6.6,9.5 7.3,8.6 8.0,7.8 8.9,7.1 9.8,6.5" fill="none" stroke="#a78bfa" stroke-width="2"/>
+          <polygon points="9.8,6.5 7.1,10.7 4.8,7.0" fill="#a78bfa"/>
+        </svg>
+        <span>Momento</span>
+      </div>
+      <div class="element-btn" data-tool="udl" title="Dist. Uniforme">
+        <svg width="48" height="22" viewBox="0 0 48 22">
+          <rect x="4" y="2" width="40" height="18" fill="#2dd4bf" fill-opacity="0.13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <line x1="10" y1="3" x2="10" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="10,18 7,12 13,12" fill="#2dd4bf"/>
+          <line x1="20" y1="3" x2="20" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="20,18 17,12 23,12" fill="#2dd4bf"/>
+          <line x1="30" y1="3" x2="30" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="30,18 27,12 33,12" fill="#2dd4bf"/>
+          <line x1="38" y1="3" x2="38" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="38,18 35,12 41,12" fill="#2dd4bf"/>
+        </svg>
+        <span>Dist. Unif.</span>
+      </div>
+      <div class="element-btn" data-tool="trap" title="Trapezoidal">
+        <svg width="48" height="22" viewBox="0 0 48 22">
+          <polygon points="4,20 4,2 44,10 44,20" fill="#2dd4bf" fill-opacity="0.13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <line x1="10" y1="4" x2="10" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="10,18 7,12 13,12" fill="#2dd4bf"/>
+          <line x1="24" y1="8" x2="24" y2="13" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="24,18 21,13 27,13" fill="#2dd4bf"/>
+          <line x1="38" y1="11" x2="38" y2="14" stroke="#2dd4bf" stroke-width="1.2"/>
+          <polygon points="38,18 35,14 41,14" fill="#2dd4bf"/>
+        </svg>
+        <span>Trapezoidal</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Diagramas</div>
+    <div class="element-grid">
+      <div class="element-btn" data-tool="diag_rect" title="Retângulo">
+        <svg width="48" height="22" viewBox="0 0 48 22"><line x1="2" y1="18" x2="46" y2="18" stroke="#f472b6" stroke-width="1"/><path d="M2,18 L2,4 L46,4 L46,18" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/></svg>
+        <span>Retângulo</span>
+      </div>
+      <div class="element-btn" data-tool="diag_trap" title="Trapezoidal">
+        <svg width="48" height="22" viewBox="0 0 48 22"><line x1="2" y1="18" x2="46" y2="18" stroke="#f472b6" stroke-width="1"/><path d="M2,18 L2,4 L46,10 L46,18" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/></svg>
+        <span>Trapézio</span>
+      </div>
+      <div class="element-btn" data-tool="diag_para" title="Parábola">
+        <svg width="48" height="22" viewBox="0 0 48 22"><line x1="2" y1="18" x2="46" y2="18" stroke="#f472b6" stroke-width="1"/><path d="M2,18 Q24,0 46,18" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/></svg>
+        <span>Parábola</span>
+      </div>
+      <div class="element-btn" data-tool="diag_para_inv" title="Parábola Inv.">
+        <svg width="48" height="22" viewBox="0 0 48 22"><line x1="2" y1="18" x2="46" y2="18" stroke="#f472b6" stroke-width="1"/><path d="M2,18 L2,4 Q24,18 46,4 L46,18 Z" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/></svg>
+        <span>Par. Inv.</span>
+      </div>
+      <div class="element-btn" data-tool="diag_curve" title="Curva">
+        <svg width="48" height="22" viewBox="0 0 48 22">
+          <line x1="2" y1="20" x2="46" y2="20" stroke="#f472b6" stroke-width="1"/>
+          <polygon points="2,20 2,4 5.1,4.1 8.0,4.4 10.6,5.0 12.9,5.7 15.1,6.5 17.0,7.5 18.9,8.5 20.7,9.6 22.3,10.8 24.0,12.0 25.7,13.2 27.3,14.4 29.1,15.5 31.0,16.5 32.9,17.5 35.1,18.3 37.4,19.0 40.0,19.6 42.9,19.9 46,20" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/>
+        </svg>
+        <span>Curva</span>
+      </div>
+      <div class="element-btn" data-tool="diag_linear" title="Triângulo">
+        <svg width="48" height="22" viewBox="0 0 48 22"><line x1="2" y1="18" x2="46" y2="18" stroke="#f472b6" stroke-width="1"/><path d="M2,18 L2,4 L46,18" fill="#f472b630" stroke="#f472b6" stroke-width="1.5"/></svg>
+        <span>Triângulo</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap">
+  <canvas id="mainCanvas"></canvas>
+</div>
+
+<div class="props-panel">
+  <div class="props-header">Propriedades</div>
+  <div class="props-body" id="propsBody">
+    <div class="no-select">Selecione um<br>elemento para<br>editar</div>
+  </div>
+  <div style="padding:6px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+    <div style="font-size:10px;color:var(--text2);text-align:center;padding:2px 0;">Desenvolvido por:</div>
+    <div style="height:100px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='80'%3E%3Crect width='180' height='80' rx='4' fill='%23242b3d'/%3E%3Ctext x='90' y='44' text-anchor='middle' font-family='sans-serif' font-size='11' fill='%236b7280'%3ELogo 1%3C/text%3E%3C/svg%3E" style="max-width:100%;max-height:100%">
+    </div>
+    <div style="font-size:10px;color:var(--text2);text-align:center;padding:2px 0;">Patrocinado por:</div>
+    <div style="height:100px;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='80'%3E%3Crect width='180' height='80' rx='4' fill='%23242b3d'/%3E%3Ctext x='90' y='44' text-anchor='middle' font-family='sans-serif' font-size='11' fill='%236b7280'%3ELogo 2%3C/text%3E%3C/svg%3E" style="max-width:100%;max-height:100%">
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="statusbar">
+  <span><div class="status-dot"></div> Pronto</span>
+  <span id="statusTool">Ferramenta: Selecionar</span>
+  <span id="statusCoords">X: 0  Y: 0</span>
+  <span id="statusCount">Elementos: 0</span>
+  <span style="margin-left:auto">R = rotar | Setas = mover | Espaço/Roda = pan</span>
+</div>
+
+<script>
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvasWrap');
+
+let exportMode = false;
+let elements = [], selectedEl = null, currentTool = 'select';
+let multiSel = [];
+let isDrawing = false, drawStart = null;
+let snapEnabled = true, gridEnabled = true, gridSize = 20;
+let lightTheme = false;
+try{
+  if(localStorage.getItem('diagrama-theme')==='light'){
+    lightTheme=true;
+    document.body.classList.add('light-theme');
+  }
+}catch(e){}
+document.getElementById('btnTheme').textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+wrap.style.background=lightTheme?'#ffffff':'';
+let history = [], future = [];
+let panX = 0, panY = 0, isPanning = false, panStart = {x:0,y:0}, spaceDown = false;
+let lastProps = {}; // stores last used props per type
+let dragEl=null, dragOff={x:0,y:0};
+let handleDrag=null; // 'p1' or 'p2'
+let winSel=null; // {x1,y1,x2,y2}
+let dragMoveSaved=false;
+
+function resize() { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; render(); }
+window.addEventListener('resize', resize);
+resize();
+
+function snap(v) { return snapEnabled ? Math.round(v/gridSize)*gridSize : v; }
+function getPos(e) { const r = canvas.getBoundingClientRect(); return {x:snap(e.clientX-r.left-panX), y:snap(e.clientY-r.top-panY)}; }
+
+document.querySelectorAll('.element-btn[data-tool]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTool = btn.dataset.tool;
+    document.querySelectorAll('.element-btn').forEach(b => b.classList.remove('tool-active'));
+    btn.classList.add('tool-active');
+    document.getElementById('statusTool').textContent = 'Ferramenta: ' + (btn.title||currentTool);
+    selectedEl = null; multiSel=[];
+    if(currentTool!=='select'&&currentTool!=='delete'){
+      var ph=makeElement(currentTool,0,0,100,0); ph._phantom=true; showProps(ph);
+    } else { showProps(null); }
+    render();
+  });
+});
+
+function accentColor(){ return lightTheme?'#7c3aed':'#2dd4bf'; }
+function selColor(){ return lightTheme?'#7c3aed':'#2dd4bf'; }
+const COLORS = {
+  beam:'#374151',
+  rect_solid:'#6b7280', tri_solid:'#6b7280', arc_solid:'#6b7280', tri_arc_solid:'#6b7280',
+  fixed:'#f97316', pin:'#f97316', roller:'#f97316', roller_fixed:'#f97316', hinge:'#fbbf24',
+  pin_linear:'#f97316', roller_linear:'#f97316', fixed_linear:'#f97316',
+  force_down:'__accent__', force_up:'__accent__', force_right:'__accent__', force_left:'__accent__',
+  udl:'__accent__', trap:'__accent__',
+  moment_cw:'#a78bfa',
+  diag_rect:'#f472b6', diag_linear:'#f472b6', diag_trap:'#f472b6', diag_curve:'#f472b6', diag_para:'#f472b6', diag_para_inv:'#f472b6',
+  dim:'#6b7280', text:'#d1d5db',
+  node:'#fbbf24', spring:'#f97316', spring_roller:'#f97316', spring_linear:'#f97316',
+  hinge_spring:'#fbbf24',
+};
+
+const DRAG_TYPES = new Set(['beam','udl','trap','dim','rect_solid','tri_solid','arc_solid','tri_arc_solid','spring_linear','pin_linear','roller_linear','fixed_linear','diag_rect','diag_linear','diag_trap','diag_curve','diag_para','diag_para_inv']);
+
+function drawElement(el, selected) {
+  ctx.save();
+  if(selected) { ctx.shadowColor=selColor(); ctx.shadowBlur=14; }
+  const rot = (el.rotation||0)*Math.PI/180;
+  ctx.translate(el.x, el.y);
+  ctx.rotate(rot);
+  ctx.translate(-el.x, -el.y);
+  drawShape(el, false);
+  ctx.restore();
+  if(selected) {
+    const b=getBoundsLocal(el);
+    const pad=6, bx=b.x-pad, by=b.y-pad, bw=b.w+pad*2, bh=b.h+pad*2;
+    const DRAG_SELF=new Set(['udl','trap','spring_linear','beam','dim','rect_solid','tri_solid','arc_solid','tri_arc_solid','pin_linear','roller_linear','fixed_linear','diag_rect','diag_linear','diag_trap','diag_curve','diag_para','diag_para_inv']);
+    let selRot=rot;
+    if(DRAG_SELF.has(el.type)){
+      const x2=el.x2!==undefined?el.x2:el.x+60, y2=el.y2!==undefined?el.y2:el.y;
+      const dragAngle=Math.atan2(y2-el.y,x2-el.x);
+      selRot=rot+dragAngle;
+    }
+    const cos=Math.cos(selRot),sin=Math.sin(selRot);
+    const rpt=(cx,cy)=>{const dx=cx-el.x,dy=cy-el.y;return[el.x+dx*cos-dy*sin,el.y+dx*sin+dy*cos];};
+    const pts=[rpt(bx,by),rpt(bx+bw,by),rpt(bx+bw,by+bh),rpt(bx,by+bh)];
+    ctx.save();
+    ctx.strokeStyle=selColor();ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));
+    ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+
+function drawHatch(ctx,x1,y1,x2,y2,c,sc){
+  var dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
+  var spacing=8*sc;
+  var n=Math.max(2,Math.floor(len/spacing));
+  var hs=6*sc;
+  // Along-line unit vector
+  var tx=dx/len, ty=dy/len;
+  // Perpendicular "into ground" (90° CW)
+  var nx=-ty, ny=tx;
+  // Hatch direction: perpendicular + backward along line (45° diagonal into ground)
+  var hx=(nx-tx)*0.707*hs, hy=(ny-ty)*0.707*hs;
+  ctx.lineWidth=1.3; ctx.strokeStyle=c;
+  for(var i=0;i<=n;i++){
+    var t=i/n;
+    var px=x1+dx*t, py=y1+dy*t;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+hx,py+hy); ctx.stroke();
+  }
+}
+
+function drawShape(el, selected) {
+  const {x,y,label} = el;
+  const sc = el.scale||1;
+  var rawC = el.color || COLORS[el.type] || '#fff';
+  const c = rawC==='__accent__'?accentColor():rawC;
+const lc = exportMode?'#111827':(lightTheme?'#111827':'#e5e7eb');
+  ctx.strokeStyle = c; ctx.fillStyle = c;
+
+  switch(el.type) {
+    case 'beam': {
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(el.x2||x+80,el.y2||y); ctx.stroke();
+      if(label){
+        var bx2=el.x2||x+80, by2=el.y2||y;
+        var bmx=(x+bx2)/2, bmy=(y+by2)/2;
+        var ba=Math.atan2(by2-y,bx2-x);
+        var totalBA=ba+(el.rotation||0)*Math.PI/180;
+        totalBA=Math.atan2(Math.sin(totalBA),Math.cos(totalBA));
+        var flip=totalBA>Math.PI/2||totalBA<-Math.PI/2;
+        var ta=flip?ba+Math.PI:ba;
+        ctx.save(); ctx.translate(bmx,bmy); ctx.rotate(ta);
+        ctx.fillStyle=lc; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='center';
+        var side=el.labelFlip?1:-1;
+        if(flip) side=-side;
+        ctx.textBaseline=side>0?'top':'bottom';
+        ctx.fillText(label,0,side*6);
+        ctx.restore();
+      }
+      break;
+    }
+    case 'rect_solid': {
+      var rx2=el.x2!==undefined?el.x2:x+80, ry2=el.y2!==undefined?el.y2:y;
+      var rddx=rx2-x, rddy=ry2-y, rdlen=Math.sqrt(rddx*rddx+rddy*rddy)||80;
+      var rh=el.rectHeight!==undefined?el.rectHeight:Math.round(rdlen/3);
+      if(el.rectFlip) rh=-rh;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.atan2(rddy,rddx));
+      ctx.fillStyle=c;
+      ctx.fillRect(0,0,rdlen,-rh);
+      ctx.restore();
+      break;
+    }
+    case 'tri_solid': {
+      var tx2=el.x2!==undefined?el.x2:x+80, ty2=el.y2!==undefined?el.y2:y;
+      var ddx=tx2-x, ddy=ty2-y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||80;
+      var th=el.triHeight!==undefined?el.triHeight:Math.round(dlen/3);
+      if(el.triFlip) th=-th;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.atan2(ddy,ddx));
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(dlen,0); ctx.lineTo(0,-th); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case 'arc_solid': {
+      var ax2=el.x2!==undefined?el.x2:x+80, ay2=el.y2!==undefined?el.y2:y;
+      var addx=ax2-x, addy=ay2-y, adlen=Math.sqrt(addx*addx+addy*addy)||80;
+      var ah=el.arcHeight!==undefined?el.arcHeight:Math.round(adlen/2);
+      if(el.arcFlip) ah=-ah;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.atan2(addy,addx));
+      ctx.fillStyle=c;
+      // Draw semicircle as scaled arc
+      ctx.save(); ctx.translate(adlen/2,0); ctx.scale(1,Math.abs(ah)/(adlen/2));
+      ctx.beginPath();
+      if(ah>0) ctx.arc(0,0,adlen/2,Math.PI,0);
+      else ctx.arc(0,0,adlen/2,0,Math.PI);
+      ctx.restore();
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case 'tri_arc_solid': {
+      var tax2=el.x2!==undefined?el.x2:x+80, tay2=el.y2!==undefined?el.y2:y;
+      var taddx=tax2-x, taddy=tay2-y, tadlen=Math.sqrt(taddx*taddx+taddy*taddy)||80;
+      var tah=el.triArcHeight!==undefined?el.triArcHeight:tadlen;
+      if(el.triArcFlip) tah=-tah;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.atan2(taddy,taddx));
+      ctx.fillStyle=c;
+      // Quarter circle: (0,0) → (0,-tah) → arc to (tadlen,0)
+      // Scale to fit: x scale = tadlen/|tah|, y scale = 1
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-tah);
+      ctx.save(); ctx.scale(tadlen/Math.abs(tah),1);
+      if(tah>0) ctx.arc(0,0,tah,-Math.PI/2,0);
+      else ctx.arc(0,0,-tah,Math.PI/2,0,true);
+      ctx.restore();
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case 'fixed': {
+      var hh=16*sc;
+      ctx.lineWidth=2.5; ctx.strokeStyle=c;
+      ctx.beginPath(); ctx.moveTo(x,y-hh); ctx.lineTo(x,y+hh); ctx.stroke();
+      drawHatch(ctx,x,y-hh,x,y+hh,c,sc,6);
+      break;
+    }
+    case 'pin': {
+      var hp=20*sc, wp=12*sc;
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-wp,y+hp); ctx.lineTo(x+wp,y+hp); ctx.closePath(); ctx.stroke();
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x-wp-3,y+hp); ctx.lineTo(x+wp+3,y+hp); ctx.stroke();
+      drawHatch(ctx,x-wp-3,y+hp,x+wp+3,y+hp,c,sc);
+      break;
+    }
+    case 'roller': {
+      var hr=20*sc, wr=12*sc, rr=3.5*sc;
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-wr,y+hr); ctx.lineTo(x+wr,y+hr); ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x-wr*0.55, y+hr+rr+2, rr, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x+wr*0.55, y+hr+rr+2, rr, 0, Math.PI*2); ctx.stroke();
+      var gY=y+hr+rr*2+4;
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x-wr-3,gY); ctx.lineTo(x+wr+3,gY); ctx.stroke();
+      drawHatch(ctx,x-wr-3,gY,x+wr+3,gY,c,sc);
+      break;
+    }
+    case 'roller_fixed': {
+      var hh=16*sc;
+      var rr=3.5*sc;
+      // Secondary bar at grid point (where beam connects)
+      var barX=Math.round((x+gridSize)/gridSize)*gridSize;
+      // Rollers touching bar: center at barX - rr - 1
+      var rcx=barX-rr-1;
+      var rsp=6.6*sc;
+      ctx.lineWidth=2; ctx.strokeStyle=c;
+      ctx.beginPath(); ctx.arc(rcx,y-rsp,rr,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rcx,y+rsp,rr,0,Math.PI*2); ctx.stroke();
+      // Wall touching rollers: at rcx - rr - 1
+      var wallX=rcx-rr-1;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(wallX,y-hh); ctx.lineTo(wallX,y+hh); ctx.stroke();
+      drawHatch(ctx,wallX,y-hh,wallX,y+hh,c,sc);
+      // Draw secondary bar
+      ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(barX,y-hh); ctx.lineTo(barX,y+hh); ctx.stroke();
+      break;
+    }
+    case 'pin_linear': {
+      var x2p=el.x2||x+100, y2p=el.y2||y;
+      var ddxp=x2p-x, ddyp=y2p-y, dlenp=Math.sqrt(ddxp*ddxp+ddyp*ddyp)||100;
+      var pa=Math.atan2(ddyp,ddxp);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(pa);
+      var spacingL=40*sc;
+      var nPins=Math.max(2,Math.round(dlenp/spacingL)+1);
+      var bs=10*sc;
+      for(var i=0;i<nPins;i++){
+        var px=dlenp*i/(nPins-1);
+        ctx.strokeStyle=c; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px-bs/2,bs); ctx.lineTo(px+bs/2,bs); ctx.closePath(); ctx.stroke();
+      }
+      ctx.lineWidth=1.5; ctx.strokeStyle=c;
+      ctx.beginPath(); ctx.moveTo(-4,bs); ctx.lineTo(dlenp+4,bs); ctx.stroke();
+      drawHatch(ctx,-4,bs,dlenp+4,bs,c,sc);
+      ctx.restore();
+      break;
+    }
+    case 'roller_linear': {
+      var x2r=el.x2||x+100, y2r=el.y2||y;
+      var ddxr=x2r-x, ddyr=y2r-y, dlenr=Math.sqrt(ddxr*ddxr+ddyr*ddyr)||100;
+      var ra2=Math.atan2(ddyr,ddxr);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(ra2);
+      var spacingR=40*sc;
+      var rrad=3.5*sc;
+      var nR=Math.max(2,Math.round(dlenr/spacingR)+1);
+      var rcy_l=rrad+1;
+      var bs_r=rcy_l+rrad+1;
+      ctx.strokeStyle=c; ctx.lineWidth=2;
+      for(var i=0;i<nR;i++){
+        var px=dlenr*i/(nR-1);
+        ctx.beginPath(); ctx.arc(px,rcy_l,rrad,0,Math.PI*2); ctx.stroke();
+      }
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(-4,bs_r); ctx.lineTo(dlenr+4,bs_r); ctx.stroke();
+      drawHatch(ctx,-4,bs_r,dlenr+4,bs_r,c,sc);
+      ctx.restore();
+      break;
+    }
+    case 'fixed_linear': {
+      var x2f=el.x2||x+100, y2f=el.y2||y;
+      var ddxf=x2f-x, ddyf=y2f-y, dlenf=Math.sqrt(ddxf*ddxf+ddyf*ddyf)||100;
+      var fa=Math.atan2(ddyf,ddxf);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(fa);
+      ctx.strokeStyle=c; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(dlenf,0); ctx.stroke();
+      drawHatch(ctx,0,0,dlenf,0,c,sc,6);
+      ctx.restore();
+      break;
+    }
+    case 'hinge': {
+      var rh=7*sc;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.arc(x,y,rh,0,Math.PI*2);
+      ctx.fillStyle=lightTheme?'#ffffff':'#111827'; ctx.fill(); ctx.stroke();
+      break;
+    }
+    case 'force_down': {
+      var len=(el.arrowLen||50)*sc;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(x,y-len); ctx.lineTo(x,y-13*sc); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-8*sc,y-14*sc); ctx.lineTo(x+8*sc,y-14*sc); ctx.closePath(); ctx.fill();
+      if(label){ctx.fillStyle=lc;ctx.font='bold '+Math.round(11)+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(label,x,y-len-2);}
+      break;
+    }
+    case 'force_up': {
+      var len=(el.arrowLen||50)*sc;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(x,y+len); ctx.lineTo(x,y+13*sc); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-8*sc,y+14*sc); ctx.lineTo(x+8*sc,y+14*sc); ctx.closePath(); ctx.fill();
+      if(label){ctx.fillStyle=lc;ctx.font='bold '+Math.round(11)+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,x,y+len+2);}
+      break;
+    }
+    case 'force_right': {
+      var len=(el.arrowLen||50)*sc;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(x-len,y); ctx.lineTo(x-14*sc,y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-14*sc,y-8*sc); ctx.lineTo(x-14*sc,y+8*sc); ctx.closePath(); ctx.fill();
+      if(label){ctx.fillStyle=lc;ctx.font='bold '+Math.round(11)+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(label,x-len/2,y-4);}
+      break;
+    }
+    case 'force_left': {
+      var len=(el.arrowLen||50)*sc;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(x+len,y); ctx.lineTo(x+14*sc,y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+14*sc,y-8*sc); ctx.lineTo(x+14*sc,y+8*sc); ctx.closePath(); ctx.fill();
+      if(label){ctx.fillStyle=lc;ctx.font='bold '+Math.round(11)+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(label,x+len/2,y-4);}
+      break;
+    }
+    case 'udl': {
+      var x2u=el.x2!==undefined?el.x2:x+100, y2u=el.y2!==undefined?el.y2:y;
+      var ddx=x2u-x, ddy=y2u-y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||100;
+      var ah=(el.h1||30)*sc;
+      var udlA=Math.atan2(ddy,ddx);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(udlA);
+      ctx.fillStyle=c+'25'; ctx.fillRect(0,-ah,dlen,ah);
+      ctx.strokeStyle=c; ctx.lineWidth=1.5; ctx.strokeRect(0,-ah,dlen,ah);
+      var nA=Math.max(2,Math.floor(dlen/20));
+      for(var i=0;i<=nA;i++){
+        var ax=dlen*i/nA;
+        ctx.lineWidth=1.8; ctx.beginPath(); ctx.moveTo(ax,-ah+2); ctx.lineTo(ax,-2); ctx.stroke();
+        if(i>0&&i<nA){
+          ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(ax,0); ctx.lineTo(ax-5*sc,-9*sc); ctx.lineTo(ax+5*sc,-9*sc); ctx.closePath(); ctx.fill();
+        }
+      }
+      if(label){
+        var totalA=udlA+(el.rotation||0)*Math.PI/180;
+        // Normalize to -PI..PI
+        totalA=Math.atan2(Math.sin(totalA),Math.cos(totalA));
+        var udlFlip=totalA>Math.PI/2||totalA<-Math.PI/2;
+        ctx.save();
+        ctx.translate(dlen/2,-ah-2);
+        if(udlFlip) ctx.rotate(Math.PI);
+        ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='center';
+        ctx.textBaseline=udlFlip?'top':'bottom';
+        ctx.fillText(label,0,udlFlip?2:0);
+        ctx.restore();
+      }
+      ctx.restore();
+      break;
+    }
+    case 'trap': {
+      var x2t=el.x2!==undefined?el.x2:x+100, y2t=el.y2!==undefined?el.y2:y;
+      var ddx=x2t-x, ddy=y2t-y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||100;
+      var h1=(el.h1||50)*sc, h2=(el.h2||20)*sc;
+      var trapA=Math.atan2(ddy,ddx);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(trapA);
+      ctx.fillStyle=c+'25';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(dlen,0); ctx.lineTo(dlen,-h2); ctx.lineTo(0,-h1); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle=c; ctx.lineWidth=1.5; ctx.stroke();
+      var nA=Math.max(2,Math.floor(dlen/22));
+      for(var i=0;i<=nA;i++){
+        var t=i/nA, ax=dlen*t, ahh=h1+(h2-h1)*t;
+        ctx.lineWidth=1.8; ctx.beginPath(); ctx.moveTo(ax,-ahh+2); ctx.lineTo(ax,-2); ctx.stroke();
+        if(i>0&&i<nA){
+          ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(ax,0); ctx.lineTo(ax-5*sc,-9*sc); ctx.lineTo(ax+5*sc,-9*sc); ctx.closePath(); ctx.fill();
+        }
+      }
+      var totalTrapA=trapA+(el.rotation||0)*Math.PI/180;
+      totalTrapA=Math.atan2(Math.sin(totalTrapA),Math.cos(totalTrapA));
+      var trapFlip=totalTrapA>Math.PI/2||totalTrapA<-Math.PI/2;
+      ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';
+      if(label){
+        ctx.save(); ctx.translate(0,-h1-8);
+        if(trapFlip) ctx.rotate(Math.PI);
+        ctx.textAlign=trapFlip?'right':'left';ctx.textBaseline=trapFlip?'top':'bottom';
+        ctx.fillText(label,0,0); ctx.restore();
+      }
+      if(el.label2){
+        ctx.save(); ctx.translate(dlen,-h2-8);
+        if(trapFlip) ctx.rotate(Math.PI);
+        ctx.textAlign=trapFlip?'left':'right';ctx.textBaseline=trapFlip?'top':'bottom';
+        ctx.fillText(el.label2,0,0); ctx.restore();
+      }
+      ctx.restore();
+      break;
+    }
+    case 'moment_cw': {
+      var r2m=(el.radius||20)*sc;
+      var ccw=el.momentFlip||false;
+      ctx.lineWidth=2.5;
+      // Dot no centro
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.arc(x,y,2.5*sc,0,Math.PI*2); ctx.fill();
+      // Arco
+      if(!ccw){
+        var startA=-Math.PI/2+0.2, endA=-Math.PI/2-0.2+Math.PI*2;
+        ctx.beginPath(); ctx.arc(x,y,r2m,startA,endA-0.35); ctx.stroke();
+        var ae=endA-0.35, axm=x+r2m*Math.cos(ae), aym=y+r2m*Math.sin(ae), td=ae+Math.PI/2;
+      } else {
+        var startA=-Math.PI/2-0.2, endA=-Math.PI/2+0.2-Math.PI*2;
+        ctx.beginPath(); ctx.arc(x,y,r2m,startA,endA+0.35,true); ctx.stroke();
+        var ae=endA+0.35, axm=x+r2m*Math.cos(ae), aym=y+r2m*Math.sin(ae), td=ae-Math.PI/2;
+      }
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.moveTo(axm,aym);
+      ctx.lineTo(axm-8*sc*Math.cos(td-0.45),aym-8*sc*Math.sin(td-0.45));
+      ctx.lineTo(axm-8*sc*Math.cos(td+0.45),aym-8*sc*Math.sin(td+0.45));
+      ctx.closePath(); ctx.fill();
+      if(label){ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(label,x,y-r2m-4);}
+      break;
+    }
+    case 'dim': {
+      var x2d=el.x2||x+80, y2d=el.y2||y;
+      var dxd=x2d-x, dyd=y2d-y, lend=Math.sqrt(dxd*dxd+dyd*dyd)||1;
+      var nx=-dyd/lend*8, ny=dxd/lend*8;
+      ctx.strokeStyle=c; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x+nx,y+ny); ctx.lineTo(x-nx,y-ny);
+      ctx.moveTo(x2d+nx,y2d+ny); ctx.lineTo(x2d-nx,y2d-ny); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x2d,y2d); ctx.stroke();
+      var ux=dxd/lend, uy=dyd/lend;
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+ux*14+nx*0.6,y+uy*14+ny*0.6); ctx.lineTo(x+ux*14-nx*0.6,y+uy*14-ny*0.6); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x2d,y2d); ctx.lineTo(x2d-ux*14+nx*0.6,y2d-uy*14+ny*0.6); ctx.lineTo(x2d-ux*14-nx*0.6,y2d-uy*14-ny*0.6); ctx.closePath(); ctx.fill();
+      ctx.fillStyle=lc;ctx.font=Math.round(11)+'px JetBrains Mono'; ctx.textAlign='center';
+      var dimA=Math.atan2(dyd,dxd);
+      var totalDimA=dimA+(el.rotation||0)*Math.PI/180;
+      totalDimA=Math.atan2(Math.sin(totalDimA),Math.cos(totalDimA));
+      var dimFlip=totalDimA>Math.PI/2||totalDimA<-Math.PI/2;
+      var dimTA=dimFlip?dimA+Math.PI:dimA;
+      ctx.save(); ctx.translate((x+x2d)/2,(y+y2d)/2); ctx.rotate(dimTA);
+      var dimSide=el.labelFlip?1:-1;
+      if(dimFlip) dimSide=-dimSide;
+      ctx.textBaseline=dimSide>0?'top':'bottom';
+      ctx.fillStyle=lc;ctx.fillText(label||'?',0,dimSide*4); ctx.restore();
+      break;
+    }
+    case 'node': {
+      var rn=7*sc;
+      ctx.fillStyle=c; ctx.strokeStyle=c; ctx.lineWidth=2;
+      ctx.fillRect(x-rn,y-rn,rn*2,rn*2);
+      break;
+    }
+    case 'spring': {
+      var mh=20*sc, cws=8*sc, coils=4;
+      ctx.lineWidth=2; ctx.strokeStyle=c;
+      var seg=mh/coils;
+      ctx.beginPath(); ctx.moveTo(x,y);
+      for(var i=0;i<coils;i++){
+        var yb=y+i*seg;
+        ctx.lineTo(x+(i%2===0?cws:-cws), yb+seg*0.5); ctx.lineTo(x, yb+seg);
+      }
+      ctx.stroke();
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x-12*sc,y+mh); ctx.lineTo(x+12*sc,y+mh); ctx.stroke();
+      drawHatch(ctx,x-12*sc,y+mh,x+12*sc,y+mh,c,sc);
+      if(label){ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(label,x+14*sc,y+mh*0.5);}
+      break;
+    }
+    case 'spring_roller': {
+      var mh2=20*sc, cws2=8*sc, coils2=4;
+      ctx.lineWidth=2; ctx.strokeStyle=c;
+      var seg2=mh2/coils2;
+      ctx.beginPath(); ctx.moveTo(x,y);
+      for(var i=0;i<coils2;i++){
+        var yb2=y+i*seg2;
+        ctx.lineTo(x+(i%2===0?cws2:-cws2), yb2+seg2*0.5); ctx.lineTo(x, yb2+seg2);
+      }
+      ctx.stroke();
+      // Rollers — same as apoio móvel: rr=3.5, gap=2, spacing=13.2
+      var rr2=3.5*sc;
+      var rcy=y+mh2+rr2+2; // gap 2 from spring bottom to roller edge, +rr to center
+      var rsp2=6.6*sc;
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(x-rsp2,rcy,rr2,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x+rsp2,rcy,rr2,0,Math.PI*2); ctx.stroke();
+      // Base line + hachura
+      var gY2=rcy+rr2+2;
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x-13*sc,gY2); ctx.lineTo(x+13*sc,gY2); ctx.stroke();
+      drawHatch(ctx,x-13*sc,gY2,x+13*sc,gY2,c,sc);
+      if(label){ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(label,x+14*sc,y+mh2*0.5);}
+      break;
+    }
+    case 'spring_linear': {
+      var x2sl=el.x2!==undefined?el.x2:x+100, y2sl=el.y2!==undefined?el.y2:y;
+      var ddx=x2sl-x, ddy=y2sl-y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||100;
+      var sw=10*sc;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.atan2(ddy,ddx));
+      ctx.lineWidth=2; ctx.strokeStyle=c;
+      var spacingSL=40*sc;
+      var nSpr=Math.max(2,Math.round(dlen/spacingSL)+1);
+      for(var s=0;s<nSpr;s++){
+        var bx=dlen*s/(nSpr-1);
+        var coils=3, ch=(sw*0.9)/coils, cw2=sw*0.35;
+        ctx.beginPath(); ctx.moveTo(bx,0);
+        for(var i=0;i<coils;i++){
+          var yb=i*ch;
+          ctx.lineTo(bx+(i%2===0?cw2:-cw2),yb+ch*0.5); ctx.lineTo(bx,yb+ch);
+        }
+        ctx.lineTo(bx,sw); ctx.stroke();
+      }
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(0,sw); ctx.lineTo(dlen,sw); ctx.stroke();
+      drawHatch(ctx,0,sw,dlen,sw,c,sc);
+      if(label){
+        var slA=Math.atan2(ddy,ddx)+(el.rotation||0)*Math.PI/180;
+        slA=Math.atan2(Math.sin(slA),Math.cos(slA));
+        var slFlip=slA>Math.PI/2||slA<-Math.PI/2;
+        ctx.save(); ctx.translate(dlen/2,-2);
+        if(slFlip) ctx.rotate(Math.PI);
+        ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='center';
+        ctx.textBaseline=slFlip?'top':'bottom';
+        ctx.fillText(label,0,0);
+        ctx.restore();
+      }
+      ctx.restore();
+      break;
+    }
+    case 'hinge_spring': {
+      // Articulação com mola - dot + espiral
+      var rsp2=15*sc;
+      ctx.lineWidth=2; ctx.strokeStyle=c;
+      // Dot no centro
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.arc(x,y,2.5*sc,0,Math.PI*2); ctx.fill();
+      // Espiral (caracol) - mesma geometria do apoio
+      ctx.beginPath();
+      var turns2=2.5, steps2=60;
+      for(var i=0;i<=steps2;i++){
+        var t=i/steps2;
+        var a=t*turns2*Math.PI*2 - Math.PI/2;
+        var r=3*sc + t*(rsp2-3*sc);
+        var px=x+r*Math.cos(a), py=y+r*Math.sin(a);
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+      if(label){ctx.fillStyle=lc;ctx.font='bold 11px JetBrains Mono';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(label,x+rsp2+6,y-10);}
+      break;
+    }
+    case 'diag_rect': case 'diag_linear': case 'diag_trap': case 'diag_curve': case 'diag_para': case 'diag_para_inv': {
+      var dx2=el.x2!==undefined?el.x2:x+100, dy2=el.y2!==undefined?el.y2:y;
+      var ddx=dx2-x, ddy=dy2-y, dlen=Math.sqrt(ddx*ddx+ddy*ddy)||100;
+      var diagA=Math.atan2(ddy,ddx);
+      var flipSign=el.diagFlipped?-1:1;
+      var dh=(el.diagH||40)*(el.scale||1)*flipSign;
+      var dh2=(el.diagH2!==undefined?el.diagH2:(el.diagH||40))*(el.scale||1)*flipSign;
+      var curv=el.diagCurve!==undefined?el.diagCurve:0.5;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(diagA);
+      // Base line
+      ctx.strokeStyle=c; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(dlen,0); ctx.stroke();
+      // Shape path
+      ctx.beginPath(); ctx.moveTo(0,0);
+      var dt=el.type;
+      if(dt==='diag_rect'){
+        ctx.lineTo(0,-dh); ctx.lineTo(dlen,-dh); ctx.lineTo(dlen,0);
+      } else if(dt==='diag_linear'){
+        ctx.lineTo(0,-dh); ctx.lineTo(dlen,0);
+      } else if(dt==='diag_trap'){
+        ctx.lineTo(0,-dh); ctx.lineTo(dlen,-dh2); ctx.lineTo(dlen,0);
+      } else if(dt==='diag_curve'){
+        // Tangente horizontal no topo, curvatura controla a forma
+        ctx.lineTo(0,-dh);
+        var cp1x=dlen*curv, cp1y=-dh;
+        var cp2x=dlen*curv, cp2y=0;
+        ctx.bezierCurveTo(cp1x,cp1y, cp2x,cp2y, dlen,0);
+      } else if(dt==='diag_para'){
+        ctx.quadraticCurveTo(dlen/2,-dh, dlen,0);
+      } else if(dt==='diag_para_inv'){
+        // Pico nas extremidades, vale no centro controlado por curvatura
+        var valleyH=dh*(1-curv); // curv=0: valley at base (dh), curv=1: valley=0 (flat)
+        ctx.lineTo(0,-dh);
+        ctx.quadraticCurveTo(dlen/2,-valleyH, dlen,-dh);
+        ctx.lineTo(dlen,0);
+      }
+      ctx.closePath();
+      ctx.fillStyle=c+'30'; ctx.fill();
+      ctx.strokeStyle=c; ctx.lineWidth=1.8; ctx.stroke();
+      // Corner dots
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(dlen,0,3,0,Math.PI*2); ctx.fill();
+      // Flip-aware text direction
+      var totalDA=diagA+(el.rotation||0)*Math.PI/180;
+      totalDA=Math.atan2(Math.sin(totalDA),Math.cos(totalDA));
+      var dTextFlip=totalDA>Math.PI/2||totalDA<-Math.PI/2;
+      // Value labels — positioned above peak of each indicator
+      if(dt==='diag_rect'||dt==='diag_linear'||dt==='diag_curve'||dt==='diag_trap'){
+        // Left height dashed line
+        if(Math.abs(dh)>1){
+          ctx.lineWidth=0.8; ctx.strokeStyle=c; ctx.setLineDash([3,3]);
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-dh); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=c; ctx.beginPath(); ctx.arc(0,-dh,3,0,Math.PI*2); ctx.fill();
+        }
+        if(el.diagV1!==undefined&&el.diagV1!==''){
+          ctx.save(); ctx.translate(0,-dh+(dh>0?-6:6));
+          if(dTextFlip) ctx.rotate(Math.PI);
+          ctx.fillStyle=lc; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+          ctx.textBaseline=dh>0?(dTextFlip?'top':'bottom'):(dTextFlip?'bottom':'top');
+          ctx.fillText(''+el.diagV1,0,0); ctx.restore();
+        }
+      }
+      if(dt==='diag_rect'||dt==='diag_trap'){
+        var rh=(dt==='diag_trap')?dh2:dh;
+        if(Math.abs(rh)>1){
+          ctx.lineWidth=0.8; ctx.strokeStyle=c; ctx.setLineDash([3,3]);
+          ctx.beginPath(); ctx.moveTo(dlen,0); ctx.lineTo(dlen,-rh); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=c; ctx.beginPath(); ctx.arc(dlen,-rh,3,0,Math.PI*2); ctx.fill();
+        }
+        if(el.diagV2!==undefined&&el.diagV2!==''){
+          ctx.save(); ctx.translate(dlen,-rh+(rh>0?-6:6));
+          if(dTextFlip) ctx.rotate(Math.PI);
+          ctx.fillStyle=lc; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+          ctx.textBaseline=rh>0?(dTextFlip?'top':'bottom'):(dTextFlip?'bottom':'top');
+          ctx.fillText(''+el.diagV2,0,0); ctx.restore();
+        }
+      }
+      if(dt==='diag_para'){
+        // Peak at center
+        var pkY=-dh*0.5;
+        if(Math.abs(dh)>1){
+          ctx.lineWidth=0.8; ctx.strokeStyle=c; ctx.setLineDash([3,3]);
+          ctx.beginPath(); ctx.moveTo(dlen/2,0); ctx.lineTo(dlen/2,pkY); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=c; ctx.beginPath(); ctx.arc(dlen/2,pkY,3,0,Math.PI*2); ctx.fill();
+        }
+        if(el.diagV1!==undefined&&el.diagV1!==''){
+          ctx.save(); ctx.translate(dlen/2,pkY+(pkY<0?-6:6));
+          if(dTextFlip) ctx.rotate(Math.PI);
+          ctx.fillStyle=lc; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+          ctx.textBaseline=pkY<0?(dTextFlip?'top':'bottom'):(dTextFlip?'bottom':'top');
+          ctx.fillText(''+el.diagV1,0,0); ctx.restore();
+        }
+      }
+      if(dt==='diag_para_inv'){
+        // Peaks at edges (left and right at -dh)
+        if(Math.abs(dh)>1){
+          ctx.lineWidth=0.8; ctx.strokeStyle=c; ctx.setLineDash([3,3]);
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-dh); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(dlen,0); ctx.lineTo(dlen,-dh); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=c;
+          ctx.beginPath(); ctx.arc(0,-dh,3,0,Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(dlen,-dh,3,0,Math.PI*2); ctx.fill();
+        }
+        if(el.diagV1!==undefined&&el.diagV1!==''){
+          ctx.save(); ctx.translate(0,-dh+(dh>0?-6:6));
+          if(dTextFlip) ctx.rotate(Math.PI);
+          ctx.fillStyle=lc; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+          ctx.textBaseline=dh>0?(dTextFlip?'top':'bottom'):(dTextFlip?'bottom':'top');
+          ctx.fillText(''+el.diagV1,0,0); ctx.restore();
+        }
+        if(el.diagV2!==undefined&&el.diagV2!==''){
+          ctx.save(); ctx.translate(dlen,-dh+(dh>0?-6:6));
+          if(dTextFlip) ctx.rotate(Math.PI);
+          ctx.fillStyle=lc; ctx.font='9px JetBrains Mono'; ctx.textAlign='center';
+          ctx.textBaseline=dh>0?(dTextFlip?'top':'bottom'):(dTextFlip?'bottom':'top');
+          ctx.fillText(''+el.diagV2,0,0); ctx.restore();
+        }
+      }
+      // Label below base
+      if(label){
+        ctx.save(); ctx.translate(dlen/2,6);
+        if(dTextFlip) ctx.rotate(Math.PI);
+        ctx.fillStyle=lc; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='center';
+        ctx.textBaseline=dTextFlip?'bottom':'top';
+        ctx.fillText(label,0,0); ctx.restore();
+      }
+      ctx.restore();
+      break;
+    }
+    case 'text': {
+      ctx.fillStyle=c;
+      ctx.font=Math.round((el.fontSize||14)*sc)+'px IBM Plex Sans';
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillText(label||'Texto',x,y);
+      break;
+    }
+  }
+}
+
+function getBoundsLocal(el) {
+  const sc=el.scale||1;
+  const x2=el.x2!==undefined?el.x2:el.x+60, y2=el.y2!==undefined?el.y2:el.y;
+  const px=Math.min(el.x,x2), py=Math.min(el.y,y2), pw=Math.abs(x2-el.x), ph=Math.abs(y2-el.y);
+  switch(el.type){
+    case 'text':{const fw=Math.max(30,(el.label||'Texto').length*(el.fontSize||14)*sc*0.56);const fh=(el.fontSize||14)*sc*1.3;return{x:el.x-2,y:el.y-2,w:fw+4,h:fh+4};}
+    case 'node':return{x:el.x-8*sc,y:el.y-8*sc,w:16*sc,h:16*sc};
+    case 'hinge':return{x:el.x-10*sc,y:el.y-10*sc,w:20*sc,h:20*sc};
+    case 'hinge_spring':return{x:el.x-17*sc,y:el.y-17*sc,w:34*sc,h:34*sc};
+    case 'force_down':{const l=(el.arrowLen||50)*sc;return{x:el.x-10*sc,y:el.y-l-2,w:20*sc,h:l+4};}
+    case 'force_up':{const l=(el.arrowLen||50)*sc;return{x:el.x-10*sc,y:el.y-2,w:20*sc,h:l+4};}
+    case 'force_right':{const l=(el.arrowLen||50)*sc;return{x:el.x-l-2,y:el.y-10*sc,w:l+4,h:20*sc};}
+    case 'force_left':{const l=(el.arrowLen||50)*sc;return{x:el.x-2,y:el.y-10*sc,w:l+4,h:20*sc};}
+    case 'moment_cw':{const r=(el.radius||20)*sc+10;return{x:el.x-r,y:el.y-r,w:r*2,h:r*2};}
+    case 'pin':return{x:el.x-16*sc,y:el.y-2,w:32*sc,h:34*sc};
+    case 'roller':return{x:el.x-16*sc,y:el.y-2,w:32*sc,h:38*sc};
+    case 'roller_fixed':return{x:el.x-10*sc,y:el.y-18*sc,w:28*sc,h:42*sc};
+    case 'pin_linear':{var dlp=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-4,y:el.y-4,w:dlp+8,h:24*sc};}
+    case 'roller_linear':{var dlr=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-4,y:el.y-4,w:dlr+8,h:16*sc};}
+    case 'fixed_linear':{var dlf=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-4,y:el.y-8*sc,w:dlf+8,h:16*sc};}
+    case 'fixed':return{x:el.x-10*sc,y:el.y-18*sc,w:12*sc,h:42*sc};
+    case 'spring':{return{x:el.x-13*sc,y:el.y,w:26*sc,h:22*sc};}
+    case 'spring_roller':{return{x:el.x-13*sc,y:el.y,w:26*sc,h:35*sc};}
+    case 'beam':case 'dim':{const len=Math.sqrt(pw*pw+ph*ph)||20;return{x:el.x-8,y:el.y-10,w:len+16,h:20};}
+    case 'udl':{const ah=Math.abs(el.h1||30)*sc;const len=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-6,y:el.y-ah-6,w:len+12,h:ah+16};}
+    case 'trap':{const ah=Math.max((el.h1||50),(el.h2||20))*sc;const len=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-6,y:el.y-ah-6,w:len+12,h:ah+16};}
+case 'spring_linear':{const len=Math.sqrt(pw*pw+ph*ph)||100;return{x:el.x-4,y:el.y-4,w:len+8,h:16*sc+8};}
+    case 'rect_solid':{var rlen=Math.sqrt(pw*pw+ph*ph)||80;var rh_b=el.rectHeight||Math.round(rlen/3);var rhEff=el.rectFlip?rh_b:-rh_b;var ryMin=Math.min(0,rhEff);var ryMax=Math.max(0,rhEff);return{x:el.x-4,y:el.y+ryMin-4,w:rlen+8,h:(ryMax-ryMin)+8};}
+    case 'tri_solid':{var len2=Math.sqrt(pw*pw+ph*ph)||80;var th3=el.triHeight||Math.round(len2/3);var thEff=el.triFlip?th3:-th3;var yMin=Math.min(0,thEff);var yMax=Math.max(0,thEff);return{x:el.x-4,y:el.y+yMin-4,w:len2+8,h:(yMax-yMin)+8};}
+    case 'arc_solid':{var alen=Math.sqrt(pw*pw+ph*ph)||80;var ahb=el.arcHeight||Math.round(alen/2);var ahPeak=el.arcFlip?ahb:-ahb;var ayMin=Math.min(0,ahPeak);var ayMax=Math.max(0,ahPeak);return{x:el.x-4,y:el.y+ayMin-4,w:alen+8,h:(ayMax-ayMin)+8};}
+    case 'tri_arc_solid':{var talen=Math.sqrt(pw*pw+ph*ph)||80;var tahb=el.triArcHeight||Math.round(talen/3);var taPeak=el.triArcFlip?tahb:-tahb;var tayMin=Math.min(0,taPeak);var tayMax=Math.max(0,taPeak);return{x:el.x-4,y:el.y+tayMin-4,w:talen+8,h:(tayMax-tayMin)+8};}
+    case 'diag_rect':case 'diag_linear':case 'diag_trap':case 'diag_curve':case 'diag_para':case 'diag_para_inv':{var dlen4=Math.sqrt(pw*pw+ph*ph)||100;var flipS=el.diagFlipped?-1:1;var dhA=Math.abs(el.diagH||40)*sc;var dhB=Math.abs(el.diagH2!==undefined?el.diagH2:el.diagH||40)*sc;var maxDH=Math.max(dhA,dhB);var yMin=flipS>0?-maxDH-8:0;var yMax=flipS>0?8:maxDH+8;return{x:el.x-4,y:el.y+yMin,w:dlen4+8,h:yMax-yMin};}
+    default:{return{x:el.x-10,y:el.y-10,w:20,h:20};}
+  }
+}
+
+function hitTest(el, mx, my) {
+  const rot = -(el.rotation||0)*Math.PI/180;
+  var dx=mx-el.x, dy=my-el.y;
+  var lx=el.x+dx*Math.cos(rot)-dy*Math.sin(rot);
+  var ly=el.y+dx*Math.sin(rot)+dy*Math.cos(rot);
+  var DRAG_HIT={beam:1,udl:1,trap:1,dim:1,spring_linear:1,rect_solid:1,tri_solid:1,arc_solid:1,tri_arc_solid:1,pin_linear:1,roller_linear:1,fixed_linear:1,diag_rect:1,diag_linear:1,diag_trap:1,diag_curve:1,diag_para:1,diag_para_inv:1};
+  if(DRAG_HIT[el.type]){
+    var x2h=el.x2!==undefined?el.x2:el.x+60, y2h=el.y2!==undefined?el.y2:el.y;
+    var ddxh=x2h-el.x, ddyh=y2h-el.y;
+    var dragA=-Math.atan2(ddyh,ddxh);
+    var dx2=lx-el.x, dy2=ly-el.y;
+    lx=el.x+dx2*Math.cos(dragA)-dy2*Math.sin(dragA);
+    ly=el.y+dx2*Math.sin(dragA)+dy2*Math.cos(dragA);
+  }
+  const b=getBoundsLocal(el);
+  const pad=4;
+  return lx>=b.x-pad&&lx<=b.x+b.w+pad&&ly>=b.y-pad&&ly<=b.y+b.h+pad;
+}
+
+function render() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(panX,panY);
+  if(gridEnabled) {
+    ctx.strokeStyle=lightTheme?'rgba(180,190,200,0.6)':'rgba(42,52,80,0.5)'; ctx.lineWidth=0.5;
+    var offX=panX%gridSize, offY=panY%gridSize;
+    for(var gx=-panX-gridSize+offX;gx<canvas.width-panX+gridSize;gx+=gridSize){ctx.beginPath();ctx.moveTo(gx,(-panY));ctx.lineTo(gx,(canvas.height-panY));ctx.stroke();}
+    for(var gy=-panY-gridSize+offY;gy<canvas.height-panY+gridSize;gy+=gridSize){ctx.beginPath();ctx.moveTo((-panX),gy);ctx.lineTo((canvas.width-panX),gy);ctx.stroke();}
+  }
+  elements.forEach(el=>drawElement(el,el===selectedEl||multiSel.includes(el)));
+  // Draw handles for selected drag element
+  if(selectedEl&&DRAG_TYPES.has(selectedEl.type)&&multiSel.length<=1){
+    var hel=selectedEl;
+    var hx2=hel.x2!==undefined?hel.x2:hel.x+60, hy2=hel.y2!==undefined?hel.y2:hel.y;
+    var hrot=(hel.rotation||0)*Math.PI/180;
+    var hdx=hx2-hel.x, hdy=hy2-hel.y;
+    var dragAng=Math.atan2(hdy,hdx);
+    var totalAng=hrot+dragAng;
+    var dlen_h=Math.sqrt(hdx*hdx+hdy*hdy)||60;
+    // Rotate p2 around p1
+    var hrx=hel.x+hdx*Math.cos(hrot)-hdy*Math.sin(hrot);
+    var hry=hel.y+hdx*Math.sin(hrot)+hdy*Math.cos(hrot);
+    // Endpoint handles (circles)
+    ctx.fillStyle=selColor(); ctx.strokeStyle='#0a0d14'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(hel.x,hel.y,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(hrx,hry,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    // Perpendicular UP in local = -Y = (sinA, -cosA) in world
+    var upX=Math.sin(totalAng), upY=-Math.cos(totalAng);
+    // Diamond handle helper
+    var drawDiamond=function(cx,cy){
+      ctx.fillStyle='#f472b6'; ctx.strokeStyle='#0a0d14'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(cx,cy-5); ctx.lineTo(cx+5,cy); ctx.lineTo(cx,cy+5); ctx.lineTo(cx-5,cy); ctx.closePath(); ctx.fill(); ctx.stroke();
+    };
+    // Midpoint along drag (in world coords)
+    var midX=(hel.x+hrx)/2, midY=(hel.y+hry)/2;
+    var sc_h=hel.scale||1;
+    // Rect solid: height handle at midpoint
+    if(hel.type==='rect_solid'){
+      var rh_hd=(hel.rectHeight||40)*sc_h;
+      var rhDir=hel.rectFlip?-1:1;
+      drawDiamond(midX+upX*rh_hd*rhDir, midY+upY*rh_hd*rhDir);
+    }
+    // Tri solid: height handle at P1
+    if(hel.type==='tri_solid'){
+      var th_hd=(hel.triHeight||40)*sc_h;
+      var thDir=hel.triFlip?-1:1;
+      drawDiamond(hel.x+upX*th_hd*thDir, hel.y+upY*th_hd*thDir);
+    }
+    // Arc solid: height handle at midpoint
+    if(hel.type==='arc_solid'){
+      var ah_hd=(hel.arcHeight||20)*sc_h;
+      var ahDir=hel.arcFlip?-1:1;
+      drawDiamond(midX+upX*ah_hd*ahDir, midY+upY*ah_hd*ahDir);
+    }
+    // Tri arc solid: height handle at P1
+    if(hel.type==='tri_arc_solid'){
+      var tah_hd=(hel.triArcHeight||40)*sc_h;
+      var tahDir=hel.triArcFlip?-1:1;
+      drawDiamond(hel.x+upX*tah_hd*tahDir, hel.y+upY*tah_hd*tahDir);
+    }
+    // UDL: height handle at left
+    if(hel.type==='udl'){
+      var uh=(hel.h1||30)*sc_h;
+      drawDiamond(hel.x+upX*uh, hel.y+upY*uh);
+    }
+    // Trap: h1 left, h2 right
+    if(hel.type==='trap'){
+      var th1=(hel.h1||30)*sc_h, th2=(hel.h2||15)*sc_h;
+      drawDiamond(hel.x+upX*th1, hel.y+upY*th1);
+      drawDiamond(hrx+upX*th2, hry+upY*th2);
+    }
+    // Diagram types: height handles
+    if(hel.type&&hel.type.startsWith('diag_')){
+      var flipS_h=hel.diagFlipped?-1:1;
+      var dh_h=(hel.diagH||40)*sc_h*flipS_h;
+      // All diag types: left height handle (except para which has center peak)
+      if(hel.type==='diag_rect'||hel.type==='diag_linear'||hel.type==='diag_trap'||hel.type==='diag_curve'){
+        drawDiamond(hel.x+upX*dh_h, hel.y+upY*dh_h);
+      }
+      // Rect and trap: right height handle
+      if(hel.type==='diag_rect'){
+        drawDiamond(hrx+upX*dh_h, hry+upY*dh_h);
+      }
+      if(hel.type==='diag_trap'){
+        var dh2_h=(hel.diagH2!==undefined?hel.diagH2:hel.diagH||40)*sc_h*flipS_h;
+        drawDiamond(hrx+upX*dh2_h, hry+upY*dh2_h);
+      }
+      // Parabola: peak at center
+      if(hel.type==='diag_para'){
+        drawDiamond(midX+upX*dh_h, midY+upY*dh_h);
+      }
+      // Parabola inv: left+right peak handles + curvature at center
+      if(hel.type==='diag_para_inv'){
+        drawDiamond(hel.x+upX*dh_h, hel.y+upY*dh_h);
+        drawDiamond(hrx+upX*dh_h, hry+upY*dh_h);
+        // Curvature handle at center (controls valley depth)
+        var piCurv=hel.diagCurve!==undefined?hel.diagCurve:0.5;
+        var piValley=dh_h*(1-piCurv);
+        ctx.fillStyle='#a78bfa'; ctx.strokeStyle='#0a0d14';
+        ctx.beginPath(); ctx.arc(midX+upX*piValley,midY+upY*piValley,4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      }
+      // Curve: height at left + curvature handle at curve midpoint
+      if(hel.type==='diag_curve'){
+        var curv_h=hel.diagCurve!==undefined?hel.diagCurve:0.5;
+        var curvPt=dlen_h*curv_h;
+        // Curvature handle along drag direction at curve control point
+        var alongX=Math.cos(totalAng), alongY=Math.sin(totalAng);
+        ctx.fillStyle='#a78bfa'; ctx.strokeStyle='#0a0d14';
+        var ccx=hel.x+alongX*curvPt, ccy=hel.y+alongY*curvPt;
+        ctx.beginPath(); ctx.arc(ccx,ccy,4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      }
+    }
+  }
+  // Draw window selection rect
+  if(winSel){
+    ctx.strokeStyle=selColor(); ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.fillStyle=lightTheme?'rgba(124,58,237,0.08)':'rgba(45,212,191,0.08)';
+    var wx=Math.min(winSel.x1,winSel.x2), wy=Math.min(winSel.y1,winSel.y2);
+    var ww=Math.abs(winSel.x2-winSel.x1), wh=Math.abs(winSel.y2-winSel.y1);
+    ctx.fillRect(wx,wy,ww,wh);
+    ctx.strokeRect(wx,wy,ww,wh);
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+  document.getElementById('statusCount').textContent='Elementos: '+elements.length;
+}
+
+
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  panX-=e.deltaX; panY-=e.deltaY;
+  render();
+},{passive:false});
+canvas.addEventListener('contextmenu', e=>{
+  e.preventDefault();
+  // Right-click: cancel selection and revert to select tool
+  selected=null; multiSel=[];
+  selectedEl=null;
+  if(currentTool!=='select'){
+    document.querySelectorAll('.element-btn').forEach(b=>b.classList.remove('tool-active'));
+    document.querySelector('[data-tool="select"]').classList.add('tool-active');
+    currentTool='select';
+  }
+  showProps(null); render();
+});
+var lastMiddleClick=0;
+
+function getHandleHit(el,mx,my){
+  if(!DRAG_TYPES.has(el.type)) return null;
+  var x2=el.x2!==undefined?el.x2:el.x+60, y2=el.y2!==undefined?el.y2:el.y;
+  var rot=(el.rotation||0)*Math.PI/180;
+  var hdx=x2-el.x, hdy=y2-el.y;
+  var dragAng=Math.atan2(hdy,hdx);
+  var totalAng=rot+dragAng;
+  var dlen_g=Math.sqrt(hdx*hdx+hdy*hdy)||60;
+  var rx2=el.x+hdx*Math.cos(rot)-hdy*Math.sin(rot);
+  var ry2=el.y+hdx*Math.sin(rot)+hdy*Math.cos(rot);
+  var upX=Math.sin(totalAng), upY=-Math.cos(totalAng);
+  var midX=(el.x+rx2)/2, midY=(el.y+ry2)/2;
+  var sc_g=el.scale||1;
+  var dist=function(ax,ay){return Math.sqrt((mx-ax)*(mx-ax)+(my-ay)*(my-ay));};
+  // Rect solid height
+  if(el.type==='rect_solid'){
+    var rh_g=(el.rectHeight||40)*sc_g;
+    var rhDir_g=el.rectFlip?-1:1;
+    if(dist(midX+upX*rh_g*rhDir_g,midY+upY*rh_g*rhDir_g)<12) return 'rh';
+  }
+  // Tri solid height
+  if(el.type==='tri_solid'){
+    var th_g=(el.triHeight||40)*sc_g;
+    var thDir_g=el.triFlip?-1:1;
+    if(dist(el.x+upX*th_g*thDir_g,el.y+upY*th_g*thDir_g)<12) return 'th';
+  }
+  // Arc solid height
+  if(el.type==='arc_solid'){
+    var ah_g=(el.arcHeight||20)*sc_g;
+    var ahDir_g=el.arcFlip?-1:1;
+    if(dist(midX+upX*ah_g*ahDir_g,midY+upY*ah_g*ahDir_g)<12) return 'ah';
+  }
+  // Tri arc solid height
+  if(el.type==='tri_arc_solid'){
+    var tah_g=(el.triArcHeight||40)*sc_g;
+    var tahDir_g=el.triArcFlip?-1:1;
+    if(dist(el.x+upX*tah_g*tahDir_g,el.y+upY*tah_g*tahDir_g)<12) return 'tah';
+  }
+  // Height handles
+  if(el.type==='udl'){
+    var uh=(el.h1||30)*sc_g;
+    if(dist(el.x+upX*uh,el.y+upY*uh)<12) return 'h1';
+  }
+  if(el.type==='trap'){
+    var th1g=(el.h1||30)*sc_g, th2g=(el.h2||15)*sc_g;
+    if(dist(el.x+upX*th1g,el.y+upY*th1g)<12) return 'h1';
+    if(dist(rx2+upX*th2g,ry2+upY*th2g)<12) return 'h2';
+  }
+  if(el.type&&el.type.startsWith('diag_')){
+    var flipS_g=el.diagFlipped?-1:1;
+    var dh_g=(el.diagH||40)*sc_g*flipS_g;
+    if(el.type==='diag_rect'||el.type==='diag_linear'||el.type==='diag_trap'||el.type==='diag_curve'){
+      if(dist(el.x+upX*dh_g,el.y+upY*dh_g)<12) return 'dh1';
+    }
+    if(el.type==='diag_rect'){
+      if(dist(rx2+upX*dh_g,ry2+upY*dh_g)<12) return 'dh1'; // same height both sides
+    }
+    if(el.type==='diag_trap'){
+      var dh2_g=(el.diagH2!==undefined?el.diagH2:el.diagH||40)*sc_g*flipS_g;
+      if(dist(rx2+upX*dh2_g,ry2+upY*dh2_g)<12) return 'dh2';
+    }
+    if(el.type==='diag_para'){
+      if(dist(midX+upX*dh_g,midY+upY*dh_g)<12) return 'dh1';
+    }
+    if(el.type==='diag_para_inv'){
+      if(dist(el.x+upX*dh_g,el.y+upY*dh_g)<12) return 'dh1';
+      if(dist(rx2+upX*dh_g,ry2+upY*dh_g)<12) return 'dh1';
+      // Curvature handle at center
+      var piCurv_g=el.diagCurve!==undefined?el.diagCurve:0.5;
+      var piValley_g=dh_g*(1-piCurv_g);
+      if(dist(midX+upX*piValley_g,midY+upY*piValley_g)<12) return 'picurve';
+    }
+    if(el.type==='diag_curve'){
+      var curv_g=el.diagCurve!==undefined?el.diagCurve:0.5;
+      var alongX=Math.cos(totalAng), alongY=Math.sin(totalAng);
+      var ccx=el.x+alongX*dlen_g*curv_g, ccy=el.y+alongY*dlen_g*curv_g;
+      if(dist(ccx,ccy)<12) return 'curve';
+    }
+  }
+  // Endpoint handles
+  if(dist(el.x,el.y)<12) return 'p1';
+  if(dist(rx2,ry2)<12) return 'p2';
+  return null;
+}
+
+canvas.addEventListener('mousedown', e=>{
+  // Ignore right click for all canvas interactions
+  if(e.button===2) return;
+  // Middle mouse button
+  if(e.button===1){
+    e.preventDefault();
+    var now=Date.now();
+    if(now-lastMiddleClick<400){
+      lastMiddleClick=0;
+      if(elements.length===0){panX=0;panY=0;render();return;}
+      var cx=0,cy=0;
+      elements.forEach(function(el){cx+=el.x;cy+=el.y;});
+      cx/=elements.length; cy/=elements.length;
+      panX=canvas.width/2-cx; panY=canvas.height/2-cy;
+      render();
+      return;
+    }
+    lastMiddleClick=now;
+    isPanning=true;
+    panStart={x:e.clientX-panX, y:e.clientY-panY};
+    canvas.style.cursor='grabbing';
+    return;
+  }
+  if(e.button===0 && spaceDown){
+    isPanning=true;
+    panStart={x:e.clientX-panX, y:e.clientY-panY};
+    canvas.style.cursor='grabbing';
+    e.preventDefault();
+    return;
+  }
+  const pos=getPos(e);
+  if(currentTool==='select'){
+    dragEl=null; handleDrag=null; dragMoveSaved=false;
+    // Check handle hit on selected element first
+    if(selectedEl&&multiSel.length<=1){
+      var hh=getHandleHit(selectedEl,pos.x,pos.y);
+      if(hh){handleDrag=hh;dragEl=selectedEl;return;}
+    }
+    // Check element hits
+    for(let i=elements.length-1;i>=0;i--){
+      if(hitTest(elements[i],pos.x,pos.y)){
+        if(e.shiftKey){
+          // Add/remove from multiSel, keeping current selectedEl
+          if(selectedEl&&!multiSel.includes(selectedEl)){
+            multiSel.push(selectedEl);
+          }
+          var idx=multiSel.indexOf(elements[i]);
+          if(idx>=0) multiSel.splice(idx,1); else multiSel.push(elements[i]);
+          if(multiSel.length===1){selectedEl=multiSel[0];multiSel=[];showProps(selectedEl);}
+          else if(multiSel.length>1){selectedEl=null;showPropsMulti();}
+          else {selectedEl=null;showProps(null);}
+          render(); return;
+        }
+        // If clicking on an element already in multiSel, start dragging group
+        if(multiSel.length>1&&multiSel.includes(elements[i])){
+          dragEl=elements[i];
+          dragOff={x:pos.x-elements[i].x,y:pos.y-elements[i].y};
+          render(); return;
+        }
+        multiSel=[];
+        selectedEl=elements[i]; dragEl=elements[i];
+        dragOff={x:pos.x-elements[i].x,y:pos.y-elements[i].y};
+        showProps(elements[i]); render(); return;
+      }
+    }
+    // Start window selection on empty area
+    if(!e.shiftKey){multiSel=[]; selectedEl=null; showProps(null);}
+    winSel={x1:pos.x,y1:pos.y,x2:pos.x,y2:pos.y};
+    render(); return;
+  }
+  if(currentTool==='delete'){
+    for(let i=elements.length-1;i>=0;i--){
+      if(hitTest(elements[i],pos.x,pos.y)){saveHistory();elements.splice(i,1);selectedEl=null;showProps(null);render();return;}
+    }
+    return;
+  }
+  if(DRAG_TYPES.has(currentTool)){isDrawing=true;drawStart=pos;return;}
+  saveHistory();
+  const el=makeElement(currentTool,pos.x,pos.y,pos.x,pos.y);
+  elements.push(el); selectedEl=el; showProps(el); render();
+});
+
+canvas.addEventListener('mousemove', e=>{
+  if(isPanning){
+    panX=e.clientX-panStart.x;
+    panY=e.clientY-panStart.y;
+    render();
+    return;
+  }
+  const pos=getPos(e);
+  document.getElementById('statusCoords').textContent='X: '+pos.x+'  Y: '+pos.y;
+  // Handle drag (resize endpoint or height)
+  if(handleDrag&&dragEl&&e.buttons===1){
+    if(!dragMoveSaved){saveHistory();dragMoveSaved=true;}
+    if(handleDrag==='p1'){
+      dragEl.x=pos.x; dragEl.y=pos.y;
+    } else if(handleDrag==='p2'){
+      var hrot2=-(dragEl.rotation||0)*Math.PI/180;
+      var dmx=pos.x-dragEl.x, dmy=pos.y-dragEl.y;
+      dragEl.x2=dragEl.x+dmx*Math.cos(hrot2)-dmy*Math.sin(hrot2);
+      dragEl.y2=dragEl.y+dmx*Math.sin(hrot2)+dmy*Math.cos(hrot2);
+    } else if(handleDrag==='h1'||handleDrag==='h2'||handleDrag==='dh1'||handleDrag==='dh2'||handleDrag==='curve'||handleDrag==='rh'||handleDrag==='th'||handleDrag==='ah'||handleDrag==='tah'||handleDrag==='picurve'){
+      var hx2d=dragEl.x2!==undefined?dragEl.x2:dragEl.x+60;
+      var hy2d=dragEl.y2!==undefined?dragEl.y2:dragEl.y;
+      var dAngH=Math.atan2(hy2d-dragEl.y,hx2d-dragEl.x)+(dragEl.rotation||0)*Math.PI/180;
+      var dlenH=Math.sqrt((hx2d-dragEl.x)*(hx2d-dragEl.x)+(hy2d-dragEl.y)*(hy2d-dragEl.y))||60;
+      var upXH=Math.sin(dAngH), upYH=-Math.cos(dAngH);
+      var alongXH=Math.cos(dAngH), alongYH=Math.sin(dAngH);
+      var scH=dragEl.scale||1;
+      if(handleDrag==='curve'){
+        // Project onto along-drag direction
+        var dmxC=pos.x-dragEl.x, dmyC=pos.y-dragEl.y;
+        var projC=dmxC*alongXH+dmyC*alongYH;
+        dragEl.diagCurve=Math.max(0.05,Math.min(0.95,projC/dlenH));
+      } else {
+        // Project onto up direction for height
+        var baseX=dragEl.x, baseY=dragEl.y;
+        if(handleDrag==='h2'||handleDrag==='dh2'){
+          var rotH=(dragEl.rotation||0)*Math.PI/180;
+          baseX=dragEl.x+(hx2d-dragEl.x)*Math.cos(rotH)-(hy2d-dragEl.y)*Math.sin(rotH);
+          baseY=dragEl.y+(hx2d-dragEl.x)*Math.sin(rotH)+(hy2d-dragEl.y)*Math.cos(rotH);
+        }
+        if(handleDrag==='rh'){
+          // Base at midpoint for rect height
+          var rotHm=(dragEl.rotation||0)*Math.PI/180;
+          var mx2=(hx2d+dragEl.x)/2, my2=(hy2d+dragEl.y)/2;
+          // Rotate midpoint
+          var mrdx=mx2-dragEl.x, mrdy=my2-dragEl.y;
+          baseX=dragEl.x+mrdx*Math.cos(rotHm)-mrdy*Math.sin(rotHm);
+          baseY=dragEl.y+mrdx*Math.sin(rotHm)+mrdy*Math.cos(rotHm);
+        }
+        var dmxH=pos.x-baseX, dmyH=pos.y-baseY;
+        var projH=dmxH*upXH+dmyH*upYH;
+        if(handleDrag==='h1'){dragEl.h1=Math.round(projH/scH);if(Math.abs(dragEl.h1)<5)dragEl.h1=dragEl.h1>=0?5:-5;}
+        else if(handleDrag==='h2'){dragEl.h2=Math.max(5,Math.round(projH/scH));}
+        else if(handleDrag==='rh'){
+          var rhDir=dragEl.rectFlip?-1:1;
+          dragEl.rectHeight=Math.max(5,Math.round(projH*rhDir/scH));
+        }
+        else if(handleDrag==='th'){
+          var thDir2=dragEl.triFlip?-1:1;
+          dragEl.triHeight=Math.max(5,Math.round(projH*thDir2/scH));
+        }
+        else if(handleDrag==='ah'){
+          var ahDir2=dragEl.arcFlip?-1:1;
+          dragEl.arcHeight=Math.max(5,Math.round(projH*ahDir2/scH));
+        }
+        else if(handleDrag==='tah'){
+          var tahDir2=dragEl.triArcFlip?-1:1;
+          dragEl.triArcHeight=Math.max(5,Math.round(projH*tahDir2/scH));
+        }
+        else if(handleDrag==='picurve'){
+          // Para_inv curvature: project onto up direction, ratio of valley vs peak
+          var flipPI=dragEl.diagFlipped?-1:1;
+          var peakH=(dragEl.diagH||40)*scH*flipPI;
+          if(Math.abs(peakH)>1){
+            var ratio=1-(projH/peakH);
+            dragEl.diagCurve=Math.max(0,Math.min(1,ratio));
+          }
+        }
+        else if(handleDrag==='dh1'){
+          var flipSH=dragEl.diagFlipped?-1:1;
+          dragEl.diagH=Math.round(projH/(scH*flipSH));
+        }
+        else if(handleDrag==='dh2'){
+          var flipSH2=dragEl.diagFlipped?-1:1;
+          dragEl.diagH2=Math.round(projH/(scH*flipSH2));
+        }
+      }
+    }
+    showProps(dragEl); render(); return;
+  }
+  // Element/group drag
+  if(dragEl&&e.buttons===1&&currentTool==='select'&&!handleDrag){
+    if(!dragMoveSaved){saveHistory();dragMoveSaved=true;}
+    const dx=pos.x-dragOff.x-dragEl.x, dy=pos.y-dragOff.y-dragEl.y;
+    var toMove=multiSel.length>1?multiSel:[dragEl];
+    toMove.forEach(function(mel){mel.x+=dx;mel.y+=dy;if(mel.x2!==undefined){mel.x2+=dx;mel.y2+=dy;}});
+    dragOff={x:pos.x-dragEl.x,y:pos.y-dragEl.y};
+    // Update property inputs in real-time
+    var pxI=document.querySelector('#pX'),pyI=document.querySelector('#pY');
+    var px2I=document.querySelector('#pX2'),py2I=document.querySelector('#pY2');
+    if(pxI&&multiSel.length<=1){pxI.value=dragEl.x;pyI.value=dragEl.y;if(px2I&&dragEl.x2!==undefined){px2I.value=dragEl.x2;py2I.value=dragEl.y2;}}
+    render(); return;
+  }
+  // Window selection drag
+  if(winSel&&e.buttons===1){
+    winSel.x2=pos.x; winSel.y2=pos.y;
+    render(); return;
+  }
+  if(isDrawing&&drawStart){
+    render();
+    ctx.save();
+    ctx.translate(panX,panY);
+    var prevC=COLORS[currentTool]||'#fff'; if(prevC==='__accent__') prevC=accentColor();
+    ctx.strokeStyle=prevC; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(drawStart.x,drawStart.y); ctx.lineTo(pos.x,pos.y); ctx.stroke();
+    ctx.restore();
+  }
+  // Cursor hint for handles
+  if(currentTool==='select'&&!dragEl&&!winSel&&selectedEl&&multiSel.length<=1){
+    var hc=getHandleHit(selectedEl,pos.x,pos.y);
+    canvas.style.cursor=hc?'crosshair':(spaceDown?'grab':'default');
+  }
+});
+
+canvas.addEventListener('mouseup', e=>{
+  if(isPanning){
+    isPanning=false;
+    canvas.style.cursor=spaceDown?'grab':'crosshair';
+    return;
+  }
+  const pos=getPos(e); dragEl=null; handleDrag=null; dragMoveSaved=false;
+  // Window selection complete
+  if(winSel){
+    var wx1=Math.min(winSel.x1,winSel.x2), wy1=Math.min(winSel.y1,winSel.y2);
+    var wx2=Math.max(winSel.x1,winSel.x2), wy2=Math.max(winSel.y1,winSel.y2);
+    winSel=null;
+    if(wx2-wx1>5||wy2-wy1>5){
+      var found=[];
+      elements.forEach(function(el){
+        var b=getBoundsLocal(el);
+        // Use center point for selection
+        var ecx=(b.x+b.w/2), ecy=(b.y+b.h/2);
+        if(ecx>=wx1&&ecx<=wx2&&ecy>=wy1&&ecy<=wy2) found.push(el);
+      });
+      if(found.length===1){selectedEl=found[0];multiSel=[];showProps(found[0]);}
+      else if(found.length>1){multiSel=found;selectedEl=null;showPropsMulti();}
+    }
+    render();
+    return;
+  }
+  if(isDrawing&&drawStart){
+    isDrawing=false;
+    if(Math.abs(pos.x-drawStart.x)+Math.abs(pos.y-drawStart.y)>5){
+      saveHistory();
+      const el=makeElement(currentTool,drawStart.x,drawStart.y,pos.x,pos.y);
+      elements.push(el); selectedEl=el; showProps(el);
+    }
+    drawStart=null; render();
+  }
+});
+
+function makeElement(type,x,y,x2,y2){
+  var elC=COLORS[type]||'#fff'; if(elC==='__accent__') elC=accentColor();
+  const el={type,x,y,x2,y2,label:'',color:elC,scale:1,rotation:0};
+  if(type==='column') el.type='beam';
+  if(type==='udl'){el.h1=30;}
+  if(type==='trap'){el.h1=40;el.h2=20;el.label2='';}
+  if(['force_down','force_up','force_right','force_left'].includes(type)) el.arrowLen=50;
+  if(type==='moment_cw') el.radius=20;
+  if(type==='spring') el.arrowLen=40;
+  if(type==='spring_roller') el.arrowLen=40;
+  if(type==='dim') el.label='?';
+  if(type==='text'){el.label='Texto';el.fontSize=14;}
+  if(type.startsWith('diag_')){el.diagH=40;el.diagH2=20;el.diagV1='';el.diagV2='';el.diagFlipped=false;el.diagCurve=0.5;}
+  if(type==='rect_solid'){
+    var rdx=x2-x, rdy=y2-y, rbl=Math.sqrt(rdx*rdx+rdy*rdy)||80;
+    el.rectHeight=Math.round(rbl/3);
+  }
+  if(type==='arc_solid'){
+    var adx=x2-x, ady=y2-y, abl=Math.sqrt(adx*adx+ady*ady)||80;
+    el.arcHeight=Math.round(abl/2);
+  }
+  if(type==='tri_arc_solid'){
+    var tadx=x2-x, tady=y2-y, tabl=Math.sqrt(tadx*tadx+tady*tady)||80;
+    el.triArcHeight=tabl;
+  }
+  if(type==='tri_solid'){
+    var dx=x2-x, dy=y2-y, bl=Math.sqrt(dx*dx+dy*dy)||80;
+    el.triHeight=Math.round(bl/3);
+  }
+  // Apply stored props from last element of same type
+  var lp=lastProps[type];
+  if(lp){
+    if(lp.color) el.color=lp.color;
+    if(lp.scale) el.scale=lp.scale;
+    if(lp.arrowLen!==undefined&&el.arrowLen!==undefined) el.arrowLen=lp.arrowLen;
+    if(lp.h1!==undefined&&el.h1!==undefined){el.h1=lp.h1;el.h2=lp.h2;}
+    if(lp.radius!==undefined&&el.radius!==undefined) el.radius=lp.radius;
+    if(lp.fontSize!==undefined&&el.fontSize!==undefined) el.fontSize=lp.fontSize;
+    if(lp.label!==undefined) el.label=lp.label;
+    if(lp.diagH!==undefined&&el.diagH!==undefined) el.diagH=lp.diagH;
+  }
+  return el;
+}
+
+function saveHistory(){history.push(JSON.stringify(elements));if(history.length>50)history.shift();future=[];}
+
+document.getElementById('btnUndo').addEventListener('click',()=>{
+  if(history.length>0){future.push(JSON.stringify(elements));elements=JSON.parse(history.pop());selectedEl=null;showProps(null);render();}
+});
+document.getElementById('btnRedo').addEventListener('click',()=>{
+  if(future.length>0){history.push(JSON.stringify(elements));elements=JSON.parse(future.pop());selectedEl=null;showProps(null);render();}
+});
+document.getElementById('btnDupe').addEventListener('click',function(){
+  if(multiSel.length>1){
+    saveHistory();
+    var clones=[];
+    for(var i=0;i<multiSel.length;i++){
+      var c={};for(var k in multiSel[i]){if(k!=='_phantom')c[k]=multiSel[i][k];}
+      c.x+=20;c.y+=20;if(c.x2!==undefined){c.x2+=20;c.y2+=20;}
+      elements.push(c);clones.push(c);
+    }
+    multiSel=clones;selectedEl=null;showPropsMulti();render();
+    return;
+  }
+  if(!selectedEl) return;
+  saveHistory();
+  var c={};for(var k in selectedEl){if(k!=='_phantom')c[k]=selectedEl[k];}
+  c.x+=20;c.y+=20;if(c.x2!==undefined){c.x2+=20;c.y2+=20;}
+  elements.push(c);selectedEl=c;showProps(c);render();
+});
+document.getElementById('btnSave').addEventListener('click',()=>{
+  const xdoc=document.implementation.createDocument('','structdraw',null);
+  const root=xdoc.documentElement;root.setAttribute('version','1.0');
+  elements.forEach(el=>{const node=xdoc.createElement('element');Object.entries(el).forEach(([k,v])=>node.setAttribute(k,String(v)));root.appendChild(node);});
+  const str=new XMLSerializer().serializeToString(xdoc);
+  const blob=new Blob([str],{type:'application/xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='diagrama.xml';a.click();URL.revokeObjectURL(a.href);
+});
+document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const parser=new DOMParser();
+      const xdoc=parser.parseFromString(ev.target.result,'application/xml');
+      const nodes=xdoc.querySelectorAll('element');
+      const loaded=[];
+      nodes.forEach(node=>{
+        const el={};
+        Array.from(node.attributes).forEach(a=>{const v=a.value;el[a.name]=(v!==''&&!isNaN(v))?+v:v;});
+        loaded.push(el);
+      });
+      saveHistory();elements=loaded;selectedEl=null;showProps(null);render();
+    }catch(err){alert('Erro ao importar: '+err.message);}
+  };
+  reader.readAsText(file);e.target.value='';
+});
+document.getElementById('btnClear').addEventListener('click',()=>{if(confirm('Limpar tudo?')){saveHistory();elements=[];selectedEl=null;showProps(null);render();}});
+document.getElementById('btnGrid').addEventListener('click',function(){gridEnabled=!gridEnabled;this.textContent='Grid: '+(gridEnabled?'ON':'OFF');render();});
+document.getElementById('btnSnap').addEventListener('click',function(){snapEnabled=!snapEnabled;this.textContent='Snap: '+(snapEnabled?'ON':'OFF');});
+document.getElementById('btnTheme').addEventListener('click',function(){
+  lightTheme=!lightTheme;
+  document.body.classList.toggle('light-theme',lightTheme);
+  wrap.style.background=lightTheme?'#ffffff':'';
+  this.textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+  try{localStorage.setItem('diagrama-theme',lightTheme?'light':'dark');}catch(e){}
+  render();
+});
+
+const ROTATABLE = t => !['beam','column'].includes(t);
+
+function showProps(el){
+  const body=document.getElementById('propsBody');
+  if(!el){body.innerHTML='<div class="no-select">Selecione um<br>elemento para<br>editar</div>';return;}
+  var isPh=el._phantom||false;
+  let h='';
+  h+='<div class="prop-group"><div class="prop-label">Rótulo / Valor</div><input class="prop-input" id="pLabel" type="text" value="'+(el.label||'')+'"></div>';
+  if(el.type==='beam') h+='<div class="prop-group"><div class="rot-btn" id="pFlipLabel" style="width:100%">↕ Espelhar texto</div></div>';
+  if(el.type==='moment_cw') h+='<div class="prop-group"><div class="rot-btn" id="pFlipMoment" style="width:100%">↔ Espelhar direção</div></div>';
+  if(el.type==='dim') h+='<div class="prop-group"><div class="rot-btn" id="pFlipLabel" style="width:100%">↕ Espelhar texto</div></div>';
+  if(el.type==='trap') h+='<div class="prop-group"><div class="prop-label">Rótulo final</div><input class="prop-input" id="pLabel2" type="text" value="'+(el.label2||'')+'"></div>';
+  if(!isPh){
+    h+='<div class="prop-group"><div class="prop-label">Posição X, Y</div><div class="prop-row"><input class="prop-input" id="pX" type="number" value="'+el.x+'"><input class="prop-input" id="pY" type="number" value="'+el.y+'"></div></div>';
+    if(DRAG_TYPES.has(el.type)) h+='<div class="prop-group"><div class="prop-label">Ponto final X2, Y2</div><div class="prop-row"><input class="prop-input" id="pX2" type="number" value="'+(el.x2||el.x)+'"><input class="prop-input" id="pY2" type="number" value="'+(el.y2||el.y)+'"></div></div>';
+  }
+  if(el.arrowLen!==undefined && el.type!=='udl') h+='<div class="prop-group"><div class="prop-label">Comprimento seta</div><input class="prop-input" id="pArrow" type="number" value="'+el.arrowLen+'"></div>';
+  if(el.type==='udl') h+='<div class="prop-group"><div class="prop-label">Altura</div><input class="prop-input" id="pH1" type="number" value="'+(el.h1||30)+'"></div>';
+  if(el.type==='trap') h+='<div class="prop-group"><div class="prop-label">Altura início / fim</div><div class="prop-row"><input class="prop-input" id="pH1" type="number" value="'+el.h1+'"><input class="prop-input" id="pH2" type="number" value="'+el.h2+'"></div></div>';
+  if(el.type==='udl'||el.type==='trap') h+='<div class="prop-group"><div class="rot-btn" id="pFlipLoad" style="width:100%">↕ Espelhar</div></div>';
+  if(el.radius!==undefined) h+='<div class="prop-group"><div class="prop-label">Raio momento</div><input class="prop-input" id="pRadius" type="number" value="'+el.radius+'"></div>';
+  if(el.fontSize!==undefined) h+='<div class="prop-group"><div class="prop-label">Tamanho fonte</div><input class="prop-input" id="pFontSize" type="number" value="'+el.fontSize+'"></div>';
+  if(el.triHeight!==undefined) h+='<div class="prop-group"><div class="prop-label">Altura triângulo</div><input class="prop-input" id="pTriH" type="number" value="'+el.triHeight+'"><div class="rot-btn" id="pFlipTri" style="width:100%;margin-top:4px">↕ Espelhar</div></div>';
+  if(el.rectHeight!==undefined) h+='<div class="prop-group"><div class="prop-label">Altura retângulo</div><input class="prop-input" id="pRectH" type="number" value="'+el.rectHeight+'"><div class="rot-btn" id="pFlipRect" style="width:100%;margin-top:4px">↕ Espelhar</div></div>';
+  if(el.arcHeight!==undefined) h+='<div class="prop-group"><div class="prop-label">Altura arco</div><input class="prop-input" id="pArcH" type="number" value="'+el.arcHeight+'"><div class="rot-btn" id="pFlipArc" style="width:100%;margin-top:4px">↕ Espelhar</div></div>';
+  if(el.triArcHeight!==undefined) h+='<div class="prop-group"><div class="prop-label">Altura triâng. arco</div><input class="prop-input" id="pTriArcH" type="number" value="'+el.triArcHeight+'"><div class="rot-btn" id="pFlipTriArc" style="width:100%;margin-top:4px">↕ Espelhar</div></div>';
+  if(el.diagH!==undefined){
+    h+='<div class="prop-group"><div class="prop-label">Altura diagrama</div><input class="prop-input" id="pDiagH" type="number" value="'+el.diagH+'"></div>';
+    if(el.type==='diag_rect'){
+      h+='<div class="prop-group"><div class="prop-label">Valor esq. / dir.</div><div class="prop-row"><input class="prop-input" id="pDiagV1" type="text" value="'+(el.diagV1||'')+'"><input class="prop-input" id="pDiagV2" type="text" value="'+(el.diagV2||'')+'"></div></div>';
+    } else if(el.type==='diag_trap'){
+      h+='<div class="prop-group"><div class="prop-label">Altura final</div><input class="prop-input" id="pDiagH2" type="number" value="'+(el.diagH2||20)+'"></div>';
+      h+='<div class="prop-group"><div class="prop-label">Valor esq. / dir.</div><div class="prop-row"><input class="prop-input" id="pDiagV1" type="text" value="'+(el.diagV1||'')+'"><input class="prop-input" id="pDiagV2" type="text" value="'+(el.diagV2||'')+'"></div></div>';
+    } else if(el.type==='diag_linear'||el.type==='diag_curve'){
+      h+='<div class="prop-group"><div class="prop-label">Valor</div><input class="prop-input" id="pDiagV1" type="text" value="'+(el.diagV1||'')+'"></div>';
+    } else if(el.type==='diag_para'){
+      h+='<div class="prop-group"><div class="prop-label">Valor pico</div><input class="prop-input" id="pDiagV1" type="text" value="'+(el.diagV1||'')+'"></div>';
+    } else if(el.type==='diag_para_inv'){
+      h+='<div class="prop-group"><div class="prop-label">Valor esq. / dir.</div><div class="prop-row"><input class="prop-input" id="pDiagV1" type="text" value="'+(el.diagV1||'')+'"><input class="prop-input" id="pDiagV2" type="text" value="'+(el.diagV2||'')+'"></div></div>';
+    }
+    if(el.type==='diag_curve'||el.type==='diag_para_inv'){
+      h+='<div class="prop-group"><div class="prop-label">Curvatura (0-1)</div><input class="prop-input" id="pDiagCurve" type="number" step="0.05" min="0" max="1" value="'+(el.diagCurve!==undefined?el.diagCurve:0.5)+'"></div>';
+    }
+    h+='<div class="prop-group"><div class="rot-btn" id="pDiagFlip" style="width:100%">↕ Espelhar diagrama</div></div>';
+  }
+  h+='<div class="prop-group"><div class="prop-label">Escala</div><input class="prop-input" id="pScale" type="number" step="0.1" min="0.3" max="4" value="'+(el.scale||1)+'"></div>';
+  if(!isPh && ROTATABLE(el.type)){
+    h+='<div class="prop-group"><div class="prop-label">Rotação (°)</div><input class="prop-input" id="pRot" type="number" step="15" value="'+(el.rotation||0)+'">';
+    h+='<div class="rot-btns"><div class="rot-btn" id="rCCW">↺ 45</div><div class="rot-btn" id="rCW">↻ 45</div><div class="rot-btn" id="r90">↻ 90</div><div class="rot-btn" id="r180">↕ 180</div></div></div>';
+  }
+  h+='<div class="prop-group"><div class="prop-label">Cor</div><div class="color-swatch">';
+  ['#2dd4bf','#7c3aed','#f97316','#a78bfa','#d1d5db','#ffd700','#ff4444','#cc88ff','#6b7280','#ffffff','#111111'].forEach(function(co){
+    h+='<div class="swatch'+(el.color===co?' active':'')+'" data-color="'+co+'" style="background:'+co+'"></div>';
+  });
+  h+='</div></div>';
+  if(!isPh){
+    h+='<div class="prop-group"><div class="prop-label">Ordem de desenho</div><div class="rot-btns"><div class="rot-btn" id="oFront">⬆ Frente</div><div class="rot-btn" id="oFwd">↑ Subir</div><div class="rot-btn" id="oBwd">↓ Descer</div><div class="rot-btn" id="oBack">⬇ Trás</div></div></div>';
+    h+='<div class="prop-group"><button class="btn" id="pDup" style="width:100%">📋 Duplicar</button></div>';
+    h+='<div class="prop-group"><button class="btn danger" id="pDel" style="width:100%">🗑 Deletar</button></div>';
+  } else {
+    h+='<div class="prop-group"><div style="text-align:center;color:var(--text2);font-size:11px;padding:4px;">Pré-configuração</div></div>';
+  }
+  body.innerHTML=h;
+
+  var _histTimer=null;
+  function propHistory(){if(!_histTimer){saveHistory();}_histTimer=clearTimeout(_histTimer);_histTimer=setTimeout(function(){_histTimer=null;},800);}
+  const bind=(id,fn)=>{const e=body.querySelector('#'+id);if(e)e.addEventListener('input',function(ev){propHistory();fn(ev);saveLastProps(el);});};
+  function saveLastProps(el){lastProps[el.type]={color:el.color,scale:el.scale,arrowLen:el.arrowLen,h1:el.h1,h2:el.h2,radius:el.radius,fontSize:el.fontSize,label:el.label,diagH:el.diagH};}
+  bind('pLabel',e=>{el.label=e.target.value;if(isPh)saveLastProps(el);render();});
+  bind('pLabel2',e=>{el.label2=e.target.value;render();});
+  var flipBtn=body.querySelector('#pFlipLabel');
+  if(flipBtn) flipBtn.addEventListener('click',function(){saveHistory();el.labelFlip=!el.labelFlip;render();});
+  var flipMom=body.querySelector('#pFlipMoment');
+  if(flipMom) flipMom.addEventListener('click',function(){saveHistory();el.momentFlip=!el.momentFlip;render();});
+  bind('pX',e=>{el.x=+e.target.value;render();});
+  bind('pY',e=>{el.y=+e.target.value;render();});
+  bind('pX2',e=>{el.x2=+e.target.value;render();});
+  bind('pY2',e=>{el.y2=+e.target.value;render();});
+  bind('pArrow',e=>{el.arrowLen=+e.target.value;render();});
+  bind('pH1',e=>{el.h1=+e.target.value;render();});
+  bind('pH2',e=>{el.h2=+e.target.value;render();});
+  var flipLoad=body.querySelector('#pFlipLoad');
+  if(flipLoad) flipLoad.addEventListener('click',function(){
+    saveHistory();
+    if(el.type==='udl') el.h1=-(el.h1||30);
+    if(el.type==='trap'){el.h1=-(el.h1||40);el.h2=-(el.h2||20);}
+    showProps(el); render();
+  });
+  bind('pRadius',e=>{el.radius=+e.target.value;render();});
+  bind('pFontSize',e=>{el.fontSize=+e.target.value;render();});
+  bind('pTriH',e=>{el.triHeight=+e.target.value;render();});
+  bind('pRectH',e=>{el.rectHeight=+e.target.value;render();});
+  var flipRect=body.querySelector('#pFlipRect');
+  if(flipRect) flipRect.addEventListener('click',()=>{saveHistory();el.rectFlip=!el.rectFlip;render();});
+  bind('pArcH',e=>{el.arcHeight=+e.target.value;render();});
+  var flipArc=body.querySelector('#pFlipArc');
+  if(flipArc) flipArc.addEventListener('click',()=>{saveHistory();el.arcFlip=!el.arcFlip;render();});
+  bind('pTriArcH',e=>{el.triArcHeight=+e.target.value;render();});
+  var flipTriArc=body.querySelector('#pFlipTriArc');
+  if(flipTriArc) flipTriArc.addEventListener('click',()=>{saveHistory();el.triArcFlip=!el.triArcFlip;render();});
+  var flipTri=body.querySelector('#pFlipTri');
+  if(flipTri) flipTri.addEventListener('click',function(){saveHistory();el.triFlip=!el.triFlip;render();});
+  bind('pScale',e=>{el.scale=+e.target.value;render();});
+  bind('pDiagH',e=>{el.diagH=+e.target.value;render();});
+  bind('pDiagH2',e=>{el.diagH2=+e.target.value;render();});
+  bind('pDiagV1',e=>{el.diagV1=e.target.value;render();});
+  bind('pDiagV2',e=>{el.diagV2=e.target.value;render();});
+  bind('pDiagCurve',e=>{el.diagCurve=+e.target.value;render();});
+  var diagFlip=body.querySelector('#pDiagFlip');
+  if(diagFlip) diagFlip.addEventListener('click',function(){saveHistory();el.diagFlipped=!el.diagFlipped;render();});
+
+  if(ROTATABLE(el.type)){
+    const ri=body.querySelector('#pRot');
+    if(ri){
+      ri.addEventListener('input',e=>{el.rotation=+e.target.value;render();});
+      const rotBy=d=>{saveHistory();el.rotation=(el.rotation||0)+d;ri.value=el.rotation;render();};
+      body.querySelector('#rCCW').addEventListener('click',()=>rotBy(-45));
+      body.querySelector('#rCW').addEventListener('click',()=>rotBy(45));
+      body.querySelector('#r90').addEventListener('click',()=>rotBy(90));
+      body.querySelector('#r180').addEventListener('click',()=>rotBy(180));
+    }
+  }
+  body.querySelectorAll('.swatch').forEach(sw=>{
+    sw.addEventListener('click',()=>{saveHistory();el.color=sw.dataset.color;body.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');saveLastProps(el);if(!isPh)render();});
+  });
+  var delBtn=body.querySelector('#pDel');
+  if(delBtn) delBtn.addEventListener('click',()=>{saveHistory();elements=elements.filter(e=>e!==el);selectedEl=null;showProps(null);render();});
+  var dupBtn=body.querySelector('#pDup');
+  if(dupBtn) dupBtn.addEventListener('click',function(){saveHistory();var c={};for(var k in el){if(k!=='_phantom')c[k]=el[k];}c.x+=20;c.y+=20;if(c.x2!==undefined){c.x2+=20;c.y2+=20;}elements.push(c);selectedEl=c;showProps(c);render();});
+  if(!isPh){
+    const _gi=()=>elements.indexOf(el);
+    const _q=id=>body.querySelector('#'+id);
+  if(_q('oFront')) _q('oFront').addEventListener('click',()=>{const i=_gi();if(i<elements.length-1){saveHistory();elements.splice(i,1);elements.push(el);render();}});
+  if(_q('oFwd'))   _q('oFwd').addEventListener('click',()=>{const i=_gi();if(i<elements.length-1){saveHistory();[elements[i],elements[i+1]]=[elements[i+1],elements[i]];render();}});
+  if(_q('oBwd'))   _q('oBwd').addEventListener('click',()=>{const i=_gi();if(i>0){saveHistory();[elements[i],elements[i-1]]=[elements[i-1],elements[i]];render();}});
+  if(_q('oBack'))  _q('oBack').addEventListener('click',()=>{const i=_gi();if(i>0){saveHistory();elements.splice(i,1);elements.unshift(el);render();}});
+  }
+}
+
+function showPropsMulti(){
+  const body=document.getElementById('propsBody');
+  let h='<div class="prop-group"><div style="text-align:center;color:var(--accent);font-weight:600;">'+multiSel.length+' elementos</div></div>';
+  h+='<div class="prop-group"><div class="prop-label">Cor</div><div class="color-swatch">';
+  ['#2dd4bf','#7c3aed','#f97316','#a78bfa','#d1d5db','#ffd700','#ff4444','#cc88ff','#6b7280','#ffffff','#111111'].forEach(co=>{
+    h+='<div class="swatch" data-color="'+co+'" style="background:'+co+'"></div>';
+  });
+  h+='</div></div>';
+  h+='<div class="prop-group"><button class="btn danger" id="pMDel" style="width:100%">🗑 Deletar todos</button></div>';
+  body.innerHTML=h;
+  body.querySelectorAll('.swatch').forEach(sw=>{sw.addEventListener('click',()=>{saveHistory();multiSel.forEach(el=>{el.color=sw.dataset.color;});render();});});
+  var delMBtn=body.querySelector('#pMDel');
+  if(delMBtn) delMBtn.addEventListener('click',function(){saveHistory();elements=elements.filter(function(e){return multiSel.indexOf(e)<0;});multiSel=[];selectedEl=null;showProps(null);render();});
+}
+
+document.getElementById('btnExport').addEventListener('click',()=>{
+  if(elements.length===0) return;
+  var margin=gridSize*2;
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  elements.forEach(function(el){
+    var b=getBoundsLocal(el);
+    var rot=(el.rotation||0)*Math.PI/180;
+    var DRAG_EXP={beam:1,udl:1,trap:1,dim:1,spring_linear:1,rect_solid:1,pin_linear:1,roller_linear:1,fixed_linear:1,diag_rect:1,diag_linear:1,diag_trap:1,diag_curve:1,diag_para:1,diag_para_inv:1};
+    var totalRot=rot;
+    if(DRAG_EXP[el.type]){
+      var ex2=el.x2!==undefined?el.x2:el.x+60, ey2=el.y2!==undefined?el.y2:el.y;
+      totalRot=rot+Math.atan2(ey2-el.y,ex2-el.x);
+    }
+    var cosR=Math.cos(totalRot),sinR=Math.sin(totalRot);
+    [[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]].forEach(function(pt){
+      var dx=pt[0]-el.x,dy=pt[1]-el.y;
+      var rx=el.x+dx*cosR-dy*sinR, ry=el.y+dx*sinR+dy*cosR;
+      if(rx<minX)minX=rx;if(rx>maxX)maxX=rx;
+      if(ry<minY)minY=ry;if(ry>maxY)maxY=ry;
+    });
+  });
+  minX-=margin;minY-=margin;maxX+=margin;maxY+=margin;
+  // Temporarily render without grid, with offset
+  var oldPanX=panX,oldPanY=panY,oldGrid=gridEnabled,oldSel=selectedEl;
+  panX=-minX;panY=-minY;gridEnabled=false;selectedEl=null;
+  exportMode=true;
+  var w=maxX-minX,h=maxY-minY;
+  canvas.width=w;canvas.height=h;
+  render();
+  var off=document.createElement('canvas');off.width=w;off.height=h;
+  off.getContext('2d').drawImage(canvas,0,0);
+  exportMode=false;
+  // Restore
+  panX=oldPanX;panY=oldPanY;gridEnabled=oldGrid;selectedEl=oldSel;
+  canvas.width=wrap.clientWidth;canvas.height=wrap.clientHeight;
+  render();
+  var a=document.createElement('a');a.download='diag.png';a.href=off.toDataURL();a.click();
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Delete'&&document.activeElement.tagName!=='INPUT'){
+    if(multiSel.length>1){saveHistory();elements=elements.filter(el=>!multiSel.includes(el));multiSel=[];selectedEl=null;showProps(null);render();}
+    else if(selectedEl){saveHistory();elements=elements.filter(el=>el!==selectedEl);selectedEl=null;multiSel=[];showProps(null);render();}
+  }
+  if(e.key==='Escape'){
+    isDrawing=false;drawStart=null;currentTool='select';
+    document.querySelectorAll('.element-btn').forEach(b=>b.classList.remove('tool-active'));
+    document.querySelector('[data-tool="select"]').classList.add('tool-active');render();
+  }
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key==='z'){e.preventDefault();document.getElementById('btnUndo').click();}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='Z'))){e.preventDefault();document.getElementById('btnRedo').click();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='d'){e.preventDefault();document.getElementById('btnDupe').click();}
+  if(selectedEl&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)&&document.activeElement.tagName!=='INPUT'){
+    e.preventDefault();
+    const d=e.shiftKey?10:2;
+    if(e.key==='ArrowLeft'){selectedEl.x-=d;if(selectedEl.x2!==undefined)selectedEl.x2-=d;}
+    if(e.key==='ArrowRight'){selectedEl.x+=d;if(selectedEl.x2!==undefined)selectedEl.x2+=d;}
+    if(e.key==='ArrowUp'){selectedEl.y-=d;if(selectedEl.y2!==undefined)selectedEl.y2-=d;}
+    if(e.key==='ArrowDown'){selectedEl.y+=d;if(selectedEl.y2!==undefined)selectedEl.y2+=d;}
+    render();
+  }
+  if(e.key==='r'&&selectedEl&&ROTATABLE(selectedEl.type)&&document.activeElement.tagName!=='INPUT'){
+    selectedEl.rotation=((selectedEl.rotation||0)+(e.shiftKey?-45:45));
+    showProps(selectedEl);render();
+  }
+  if(e.key===' '&&document.activeElement.tagName!=='INPUT'){
+    e.preventDefault();
+    spaceDown=true;
+    canvas.style.cursor='grab';
+  }
+});
+document.addEventListener('keyup',e=>{
+  if(e.key===' '){spaceDown=false;if(!isPanning)canvas.style.cursor='crosshair';}
+});
+
+document.getElementById('btnTheme').textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+if(!lightTheme) wrap.style.background='';
+
+render();
+</script>
+</body>
+</html>
