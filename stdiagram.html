@@ -1814,7 +1814,7 @@ document.getElementById('btnTheme').addEventListener('click',function(){
   lightTheme=!lightTheme;
   document.body.classList.toggle('light-theme',lightTheme);
   wrap.style.background='';
-  this.textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+  this.textContent=lightTheme?'🌙 Escuro':'☀️ Claro';
   document.getElementById('logoST').src=lightTheme?'logo/logostp.png':'logo/logostn.png';
   document.getElementById('logoHE').src=lightTheme?'logo/logohep.png':'logo/logohen.png';
   try{localStorage.setItem('diagrama-theme',lightTheme?'light':'dark');}catch(e){}
@@ -2050,7 +2050,7 @@ document.addEventListener('keyup',e=>{
   if(e.key===' '){spaceDown=false;if(!isPanning)canvas.style.cursor='crosshair';}
 });
 
-document.getElementById('btnTheme').textContent=lightTheme?'🌙 Escuro':'☀ Claro';
+document.getElementById('btnTheme').textContent=lightTheme?'🌙 Escuro':'☀️ Claro';
 if(!lightTheme) wrap.style.background='';
 
 render();
